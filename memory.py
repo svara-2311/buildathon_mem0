@@ -31,6 +31,17 @@ def user_id(name: str) -> str:
     return name.strip().lower()
 
 
+def _ensure_mem0_dir() -> None:
+    """mem0 runs os.makedirs(~/.mem0) at import time, which raises on a read-only home (serverless).
+    It honours MEM0_DIR, so point that at a writable directory before importing the client."""
+    if os.getenv("MEM0_DIR"):
+        return
+    try:
+        (Path(os.path.expanduser("~")) / ".mem0").mkdir(parents=True, exist_ok=True)
+    except OSError:
+        os.environ["MEM0_DIR"] = str(Path(tempfile.gettempdir()) / ".mem0")
+
+
 class _LocalStore:
     """Tiny stand-in for MemoryClient: keyword-overlap search, newest first on ties."""
 
@@ -76,6 +87,7 @@ class TripMemory:
     def __init__(self, local_path: Path | None = None):
         key = os.getenv("MEM0_API_KEY")
         if key and local_path is None:
+            _ensure_mem0_dir()
             from mem0 import MemoryClient
             self.client, self.local, self.backend = MemoryClient(api_key=key), None, "mem0"
         else:
