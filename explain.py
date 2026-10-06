@@ -12,16 +12,23 @@ load_dotenv()
 MODEL = "claude-sonnet-5-5"
 
 
+LAST_ERROR: str | None = None     # why the most recent LLM call fell back; surfaced by /api/llm-check
+
+
 def _ask(system: str, user: str, max_tokens: int = 1200) -> str | None:
+    global LAST_ERROR
     if not os.getenv("ANTHROPIC_API_KEY"):
+        LAST_ERROR = "ANTHROPIC_API_KEY is not set"
         return None
     try:
         import anthropic
         msg = anthropic.Anthropic().messages.create(
             model=MODEL, max_tokens=max_tokens, system=system, messages=[{"role": "user", "content": user}])
+        LAST_ERROR = None
         return msg.content[0].text
     except Exception as e:  # network, auth, rate limit: degrade to the template
-        print(f"[explain] LLM call failed, using fallback: {e}")
+        LAST_ERROR = f"{type(e).__name__}: {e}"
+        print(f"[explain] LLM call failed, using fallback: {LAST_ERROR}")
         return None
 
 

@@ -257,6 +257,16 @@ def api_seed():
     return dict(ok=True, backend=mem.backend, note="sample history loaded under group 'group:friends-2026'")
 
 
+@app.get("/api/llm-check", include_in_schema=False)
+def llm_check():
+    """Diagnostic: makes one tiny Claude call and reports the real error if it fails, since explanations
+    fall back to templates silently."""
+    text = explain._ask("Reply with the single word: ok", "ping", max_tokens=8)
+    return dict(ok=bool(text), model=explain.MODEL, reply=(text or "").strip()[:40],
+                error=explain.LAST_ERROR, key_present=bool(os.getenv("ANTHROPIC_API_KEY")),
+                key_prefix=(os.getenv("ANTHROPIC_API_KEY") or "")[:11] or None)
+
+
 @app.get("/api/settings")
 def api_settings():
     """Every planner knob with its default; pass overrides in POST /api/plan {settings:{...}}."""
