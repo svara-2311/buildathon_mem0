@@ -16,14 +16,15 @@ without `ANTHROPIC_API_KEY` explanations and feedback parsing fall back to templ
 
 ## Deploy (Vercel)
 
-`vercel.json` routes every request to `api/index.py`, which serves the same FastAPI app, and `includeFiles`
-bundles the root modules plus `destinations/` and `frontend/` (import tracing alone does not pick up the
-JSON data or the HTML). Do not pin the Python runtime version - that fails the build with
-`pin-version-mismatch`; Vercel picks the runtime from `requirements.txt`.
+Vercel detects the FastAPI app in `main.py` and routes every path to it. **Do not add a `vercel.json`
+rewrite** like `/(.*) -> /api/index.py`: rewrites in a detected backend-framework project replace the
+request path with the destination, so FastAPI then sees `/api/index.py` for every request and answers
+`{"detail":"Not Found"}`. Do not pin the Python runtime either (`pin-version-mismatch` fails the build).
 
-Set `MEM0_API_KEY` and `ANTHROPIC_API_KEY` as project env vars. The filesystem is read-only there, so
-local-JSON memory falls back to `/tmp` (lost on cold start - use a real Mem0 key for a live demo) and
-destination editing returns 503.
+Set `MEM0_API_KEY` and `ANTHROPIC_API_KEY` as project env vars, then check `/health`: it reports the
+memory backend, any Mem0 error, whether the UI is bundled and which keys are present. The filesystem is
+read-only there, so local-JSON memory falls back to `/tmp` (lost on cold start, so use a real Mem0 key
+for a live demo) and destination editing returns 503.
 
 ## Python API
 
