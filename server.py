@@ -106,7 +106,7 @@ def plan_out(key: str, it: dict, dest: dict, priority: str | None, note: str, ch
     sc = it["scorecard"]
     sat = {n: round(v["mean"] * 100) for n, v in sc["satisfaction"].items()}
     return dict(key=key, label=PLAN_LABELS[key], note=note, days=days, changes=changes,
-                headline=it["headline"], shared_with=shared,
+                headline=it["headline"], headline_metric=it["headline_metric"], shared_with=shared,
                 sc=dict(travel=sc["travel_min"], dwell=sc["dwell_min"], cost=round(sc["total_cost"]), sat=sat,
                         minSat=min(sat.values()), meanSat=round(sum(sat.values()) / len(sat))))
 

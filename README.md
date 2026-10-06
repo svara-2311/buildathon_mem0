@@ -95,7 +95,19 @@ Vocabulary translation (see `server.py`): pace balanced/packed to moderate/activ
 Group memory is `group:<room.code>`; there is no fallback group.
 
 ## How the three plans are chosen (`planner.plan`)
-For each request the planner builds a pool of ~50-80 distinct greedy itineraries (16 weight sets x 5 place-subset variants), drops any that fail shared floors (2+ activities/day, worst-off traveler near the best, no day over 5h of travel), then picks per mode by its headline metric: **Fastest** = lowest share of the trip spent travelling, **Cheapest** = lowest cost, **Max Experience** = most time at spots. Each plan carries `headline` and `shared_with` (set when one itinerary genuinely wins two modes and the runner-up would be >15% worse).
-Satisfaction per traveler: a neutral stop scores 0.45 and two matching interests 1.0, then dealbreaker/budget penalties; reported 0-100.
+For each request the planner builds a pool of ~50-80 distinct greedy itineraries (16 weight sets x 5
+place-subset variants) and drops any that fail shared floors (2+ activities/day, worst-off traveler near
+the best, no day over 5h of travel). It then picks the best *triple*: three different plans where each one
+wins the scorecard row it claims - **Fastest** the least transit, **Cheapest** the lowest cost,
+**Max Experience** the most time at spots. A card never loses the number it advertises.
+
+If no distinct triple can satisfy all three claims, each mode takes the outright winner for its own metric
+and the duplicate is labelled `shared_with` ("same plan as Cheapest, which wins on both") rather than
+showing a worse plan under a false headline. Each plan carries `headline` and `headline_metric` so the UI
+can mark the guaranteed row. Verified over 72 destination x group x days x constraint combinations:
+zero false claims.
+
+Satisfaction per traveler: a neutral stop scores 0.45 and two matching interests 1.0, then
+dealbreaker/budget penalties; reported 0-100.
 
 Nothing above is hardcoded policy: `planner.DEFAULT_SETTINGS` holds all 22 knobs (wake buffer, budget rule min/median/none, pace caps, least-misery weight, what "long walks"/"early mornings"/"late nights"/"expensive meals" mean, dealbreaker penalty vs hard exclude, meal windows, day window, selection floors). Pass overrides per request; unknown keys and bad values raise 422.

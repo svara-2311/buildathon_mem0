@@ -2,6 +2,7 @@
 
 No LLM here. `adjustments` is how memory/feedback influences a plan (see ADJUSTMENT_KEYS).
 """
+from itertools import product
 from math import asin, cos, radians, sin, sqrt
 
 from data import fmt, to_min
@@ -11,7 +12,9 @@ from data import fmt, to_min
 # Cheapest the lowest cost, Max Experience the most time at spots, among plans that clear the same floors.
 MODES = ("fastest", "max_experience", "cheapest")
 MODE_LABELS = {"fastest": "Fastest", "max_experience": "Max Experience", "cheapest": "Cheapest"}
-HEADLINE = {"fastest": "least time spent travelling", "max_experience": "most time at spots", "cheapest": "lowest cost"}
+HEADLINE = {"fastest": "least time in transit", "max_experience": "most time at spots", "cheapest": "lowest cost per person"}
+# the scorecard row each mode is guaranteed to win, so the UI can mark it
+HEADLINE_METRIC = {"fastest": "travel", "max_experience": "dwell", "cheapest": "cost"}
 
 # Greedy scoring weights tried for every pool member: marginal score =
 #   w_fit*fit*dur_h + w_dwell*dur_h - w_travel*travel_h - w_cost*cost/10
@@ -42,7 +45,7 @@ DEFAULT_SETTINGS = dict(
     max_wait_min=60,             # max idle wait for a place to open
     lunch_window=["11:30", "14:30"], dinner_window=["17:30", "21:00"],
     day_start=None, day_end=None,                          # override the destination's day window ("HH:MM")
-    pool_variants=5, min_eligible=4,                       # selection internals
+    pool_variants=5, min_eligible=4, select_top_k=8,       # selection internals
 )
 _SETTING_TYPES = {k: type(v) for k, v in DEFAULT_SETTINGS.items() if v is not None}
 
@@ -332,15 +335,35 @@ def _sig(it):
 
 # objective per mode: lower is better, computed on the finished itinerary's scorecard
 OBJECTIVE = {
-    "fastest": lambda sc: (sc["travel_share"], sc["travel_min"]),
+    # absolute minutes, because that is the number the scorecard shows: a plan that wins on
+    # "share of time travelling" but shows more total transit than Cheapest just looks broken.
+    "fastest": lambda sc: (sc["travel_min"], sc["travel_share"]),
     "cheapest": lambda sc: (sc["total_cost"], -sc["dwell_min"]),
     "max_experience": lambda sc: (-sc["dwell_min"], -sc["mean_satisfaction"]),
 }
 
 
+# Guaranteed on screen: among the three plans shown, Fastest has the least transit, Cheapest the
+# lowest cost and Max Experience the most time at spots. A card must never lose the row it claims.
+CLAIM = {
+    "fastest": lambda sc: sc["travel_min"],
+    "cheapest": lambda sc: sc["total_cost"],
+    "max_experience": lambda sc: -sc["dwell_min"],
+}
+
+
+def _claims_hold(chosen: dict) -> bool:
+    return all(CLAIM[m](chosen[m]["scorecard"]) <= min(CLAIM[m](o["scorecard"]) for o in chosen.values())
+               for m in chosen)
+
+
+def _label(it: dict, mode: str, shared: str | None = None) -> dict:
+    return {**it, "mode": mode, "label": MODE_LABELS[mode], "headline": HEADLINE[mode],
+            "headline_metric": HEADLINE_METRIC[mode], "shared_with": shared}
+
+
 def _select(pool: list[dict], days: int, cfg: dict) -> dict:
-    """Pick one pool plan per mode by its headline metric, among plans clearing the shared floors.
-    Modes are filled cheapest, fastest, max so a tie never hands two modes the same itinerary."""
+    """Pick one plan per mode from the pool, under shared floors, so every card wins its own metric."""
     best_min = max(it["scorecard"]["min_satisfaction"] for it in pool)
     tiers = [  # progressively relax the floors so there is always an answer
         lambda sc: sc["activities"] >= cfg["min_activities_per_day"] * days
@@ -352,24 +375,31 @@ def _select(pool: list[dict], days: int, cfg: dict) -> dict:
     tiered = [[it for it in pool if t(it["scorecard"])] for t in tiers]
     # strictest tier that still leaves enough plans to choose between; otherwise the strictest non-empty one
     eligible = next((e for e in tiered if len(e) >= cfg["min_eligible"]), None) or next(e for e in tiered if e)
-    out, taken = {}, set()
-    # a plan can only serve one mode; fill modes in order of how much their best pick beats the field
-    def margin(mode):
-        vals = sorted(OBJECTIVE[mode](it["scorecard"])[0] for it in eligible)
-        spread = (vals[-1] - vals[0]) or 1
-        return (vals[1] - vals[0]) / spread if len(vals) > 1 else 0
-    for mode in sorted(("cheapest", "fastest", "max_experience"), key=margin, reverse=True):
-        ranked = sorted(eligible, key=lambda it: OBJECTIVE[mode](it["scorecard"]))
-        pick = next((it for it in ranked if _sig(it) not in taken), ranked[0])
-        best_v, pick_v = (OBJECTIVE[mode](it["scorecard"])[0] for it in (ranked[0], pick))
-        shared = None
-        if _sig(pick) != _sig(ranked[0]) and (pick_v - best_v) / (abs(best_v) or 1) > cfg["share_gap"]:
-            # the runner-up would be clearly worse on this mode's own metric: honestly share the dominant plan instead
-            pick = ranked[0]
-            shared = next(m for m, it in out.items() if _sig(it) == _sig(pick))
-        taken.add(_sig(pick))
-        out[mode] = {**pick, "mode": mode, "label": MODE_LABELS[mode], "headline": HEADLINE[mode], "shared_with": shared}
-    return {m: out[m] for m in MODES}
+
+    ranked = {m: sorted(eligible, key=lambda it: OBJECTIVE[m](it["scorecard"])) for m in MODES}
+    rank_of = {m: {_sig(it): i for i, it in enumerate(order)} for m, order in ranked.items()}
+
+    # Prefer three *different* plans whose claims all hold; among those, the best-ranked overall.
+    k = max(1, min(len(eligible), cfg["select_top_k"]))
+    best, best_cost = None, None
+    for combo in product(*(ranked[m][:k] for m in MODES)):
+        chosen = dict(zip(MODES, combo))
+        if len({_sig(it) for it in combo}) < len(MODES) or not _claims_hold(chosen):
+            continue
+        cost = sum(rank_of[m][_sig(it)] for m, it in chosen.items())
+        if best_cost is None or cost < best_cost:
+            best, best_cost = chosen, cost
+    if best:
+        return {m: _label(best[m], m) for m in MODES}
+
+    # No distinct triple can keep every claim true, so let one plan serve the modes it genuinely wins.
+    # Each mode takes the outright best plan for its own metric, which is therefore also best on screen.
+    winners = {m: min(eligible, key=lambda it: (CLAIM[m](it["scorecard"]), OBJECTIVE[m](it["scorecard"]))) for m in MODES}
+    out = {}
+    for m in MODES:
+        shared = next((o for o in out if _sig(winners[o]) == _sig(winners[m])), None)
+        out[m] = _label(winners[m], m, shared)
+    return out
 
 
 def plan(destination: dict, travelers: list[dict], days: int = 3, adjustments: dict | None = None,

@@ -55,6 +55,9 @@
   .chip.static:hover{border-color:var(--line)}
   .chip.static.shared{background:var(--good);color:#fff;border-color:var(--good)}
   .chip.static.avoidc{color:var(--bridge-ink);border-color:#efc4b8}
+  .phead{font-size:12px;color:#4a6b78;margin:-2px 0 10px;text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+  .metric.claim,.big.claim{box-shadow:inset 2px 0 0 #2f6f8f;padding-left:8px;border-radius:3px}
+  .metric.claim span:last-child{font-weight:700;color:#2f6f8f}
   .badge{font-size:11.5px;font-weight:500;color:#2f6f8f;margin-left:8px;font-style:italic;text-transform:none;letter-spacing:0}
   .avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;font-family:var(--display);font-weight:700;font-size:13px;flex:none}
   .x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;line-height:1;align-self:flex-start}
@@ -343,7 +346,7 @@ async function loadLodgings(){
 let members=[], addState='idle', draft=null, result=null, selPlan='fastest', chosenPlan=null, activeDay=0, agentNotes=[];
 $('#roomchip').textContent='Room '+room.code;
 
-function blankDraft(name){return {name,wake_time:'09:00',rest_windows:[],diet:[],budget_per_day:100,pace:'balanced',interests:[],dealbreakers:[],returning:false,fromMem:[]};}
+function blankDraft(name){return {name,wake_time:'09:00',rest_windows:[],diet:[],budget_per_day:100,pace:'balanced',interests:[],dealbreakers:[],returning:false,fromMem:[],sources:{}};}
 function parseRest(s){return [...String(s).matchAll(/(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})/g)].map(m=>`${m[1]}-${m[2]}`);}
 function effWake(m){let w=toMin(m.wake_time||'09:00'); if(m.dealbreakers.includes('early mornings')) w=Math.max(w,540); return w;}
 
@@ -386,7 +389,7 @@ function renderMembers(){
     <div class="member">
       ${avatar(m.name)}
       <div class="info">
-        <b>${esc(m.name)}</b>${m.fromMem.length?'<span class="badge">remembered from past trips</span>':''}
+        <b>${esc(m.name)}</b>${memBadge(m)}
         <div class="line">Up at ${fmt(toMin(m.wake_time))}, $${m.budget_per_day} a day, ${m.pace} pace${m.diet.length?', '+esc(m.diet.join(', ')):''}${m.rest_windows.length?', rests '+esc(m.rest_windows.join(', ')):''}</div>
         <div class="chips">${m.interests.map(k=>`<span class="chip static">${INTERESTS.find(x=>x[0]===k)?.[1]||k}</span>`).join('')}${m.dealbreakers.map(k=>`<span class="chip static avoidc">no ${esc(k)}</span>`).join('')}</div>
       </div>
@@ -413,7 +416,13 @@ function renderAdd(){
   if(addState==='name'){ el.innerHTML=`<div class="card"><label>Traveler name</label><div class="row" style="flex-wrap:nowrap"><input id="nm" placeholder="e.g. Nehmat"><button class="primary sm" data-a="lookup">Continue</button><button class="secondary sm" data-a="cancel">Cancel</button></div>
       <p class="hint">Returning traveler? We fill in what this destination remembers, and carry the rest over from their last trip. <span id="knownnames"></span></p></div>`; setTimeout(()=>{const n=$('#nm'); if(n) n.focus(); showKnown();},0); return; }
   if(addState==='recalling'){ el.innerHTML=`<div class="card"><span class="inline-spin"></span> Checking memory for ${esc(draft.name)}…</div>`; return; }
-  const d=draft, b=k=>d.fromMem.includes(k)?`<span class="badge" data-badge="${k}">remembered</span>`:'';
+  const d=draft, b=k=>{
+    if(!d.fromMem.includes(k)) return '';
+    const src=(d.sources||{})[k]||{}, where=destName(src.destination);
+    const txt=src.scope==='carried' ? (where?`carried from ${where}`:'from a past trip')
+            : (where?`set for ${where} last time`:'remembered');
+    return `<span class="badge" data-badge="${k}" title="Mem0 remembered this; edit it and the badge clears">${esc(txt)}</span>`;
+  };
   const chips=(key,list,cls)=>list.map(([k,l])=>`<span class="chip ${cls||''} ${d[key].includes(k)?'on':''}" data-v="${k}">${l}</span>`).join('');
   el.innerHTML=`<div class="card">
     <div class="tcard-head">${`<div class="avatar" style="background:${COLORS[members.length%5]}">${esc((d.name[0]||'?').toUpperCase())}</div>`}<div><b>${esc(d.name)}</b><div class="hint" style="margin:0">${d.returning?'Welcome back. We filled in what we remember. Edit anything that changed.':'New traveler. Tell us what you need.'}</div></div></div>
@@ -430,6 +439,17 @@ function renderAdd(){
     <label style="margin-top:12px">Dealbreakers ${b('dealbreakers')}</label><div class="chips" data-chips="dealbreakers">${chips('dealbreakers',DEALBREAKERS,'avoid')}</div>
   </div>
   <div class="navrow"><button class="secondary" data-a="cancel">Cancel</button><div>${!d.returning?'<button class="linkbtn" data-a="autofill">Fill a starting point</button> ':''}<button class="primary" data-a="save">Add to trip</button></div></div>`;
+}
+const destName=k=>k?((DESTS.find(d=>d.name===k)||{}).label||k):'';
+function memBadge(m){
+  const keys=m.fromMem||[], src=m.sources||{};
+  if(!keys.length) return '';
+  const here=keys.filter(k=>src[k]&&src[k].scope!=='carried'), from=keys.filter(k=>src[k]&&src[k].scope==='carried');
+  const whence=[...new Set(from.map(k=>destName(src[k].destination)).filter(Boolean))];
+  const bits=[];
+  if(here.length) bits.push(`${here.length} set for ${destLabel||'this trip'}`);
+  if(from.length) bits.push(`${from.length} carried${whence.length?' from '+whence.join(', '):''}`);
+  return `<span class="badge">${esc(bits.join(' · ')||'remembered')}</span>`;
 }
 function renderAll(){
   renderMembers(); renderGroup(); renderAdd();
@@ -464,12 +484,12 @@ async function lookup(){
   if(members.some(m=>m.name.toLowerCase()===name.toLowerCase())){ toast(`${name} is already on the trip`); return; }
   draft=blankDraft(name); addState='recalling'; renderAdd();
   const rec=await mem0Recall(name);
-  if(rec&&rec.fields) draft={...blankDraft(rec.name),...clone(rec.fields),returning:true,fromMem:Object.keys(rec.fields)};
+  if(rec&&rec.fields) draft={...blankDraft(rec.name),...clone(rec.fields),returning:true,fromMem:Object.keys(rec.fields),sources:rec.sources||{}};
   addState='form'; renderAdd();
 }
 async function saveDraft(){
   if(!draft.budget_per_day||draft.budget_per_day<20){ toast('Add a daily budget'); return; }
-  const m=clone(draft); members.push(m); mem0SaveProfile(m);
+  const m=clone(draft); members.push(m); mem0SaveProfile(m);   // sources ride along for the badge
   addState='idle'; draft=null; renderAll();
 }
 $('#members').addEventListener('click',e=>{ const d=e.target.closest('[data-del]'); if(d){ members.splice(+d.dataset.del,1); renderAll(); } });
@@ -492,7 +512,7 @@ function buildPayload(){
 /* =====================================================================
    RESULTS UI
    ===================================================================== */
-const METRICS=[['Transit',p=>p.sc.travel,v=>v+' min',false],['Time at spots',p=>p.sc.dwell,v=>v+' min',true],['Lowest fit',p=>p.sc.minSat,v=>v+'%',true],['Average fit',p=>p.sc.meanSat,v=>v+'%',true]];
+const METRICS=[['Transit',p=>p.sc.travel,v=>v+' min',false,'travel'],['Time at spots',p=>p.sc.dwell,v=>v+' min',true,'dwell'],['Lowest fit',p=>p.sc.minSat,v=>v+'%',true],['Average fit',p=>p.sc.meanSat,v=>v+'%',true]];
 function routeSVG(p){
   const all=p.days.flatMap(d=>d.stops).filter(x=>x.lat!=null);
   if(!all.length) return '';
@@ -520,9 +540,10 @@ function renderPlans(){
       <div class="route">${routeSVG(p)}</div>
       <div class="pbody">
         <div class="ptop"><h3>${esc(p.label)}</h3>${p.key===chosenPlan?'<span class="picktag">Group pick</span>':''}</div>
-        <div class="big ${p.sc.cost===bestCost?'best':''}">$${p.sc.cost}<small>per person</small></div>
+        <div class="phead">${esc(p.headline||'')}${p.shared_with?` &middot; same plan as ${esc((P.find(x=>x.key===p.shared_with)||{}).label||p.shared_with)}, which wins on both`:''}</div>
+        <div class="big ${p.sc.cost===bestCost?'best':''} ${p.headline_metric==='cost'?'claim':''}">$${p.sc.cost}<small>per person</small></div>
         <div class="pnote">${esc(p.note)}</div>
-        ${METRICS.map(([lab,fn,f],i)=>`<div class="metric ${fn(p)===best[i]?'best':''}"><span>${lab}</span><span>${f(fn(p))}</span></div>`).join('')}
+        ${METRICS.map(([lab,fn,f,,metric],i)=>`<div class="metric ${fn(p)===best[i]?'best':''} ${metric&&metric===p.headline_metric?'claim':''}"><span>${lab}</span><span>${f(fn(p))}</span></div>`).join('')}
         <div class="sats">${Object.entries(p.sc.sat).map(([n,v])=>`<div class="sat">${avatar(n)}<div class="satbar"><i style="width:${v}%;background:${colorOf(n)}"></i></div><b class="${v<=p.sc.minSat?'low':''}">${v}%</b></div>`).join('')}</div>
         <button class="${p.key===chosenPlan?'primary on':'secondary'} pickbtn" data-choose="${p.key}">${p.key===chosenPlan?'Group pick':'Pick this plan'}</button>
       </div>
