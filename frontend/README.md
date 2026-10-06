@@ -6,9 +6,18 @@ Cheapest) with scorecards. Feedback is written to memory and the trip is re-plan
 
 Single static file, no build step.
 
+The backend serves this file, so just run the server from the repo root and open http://127.0.0.1:8000:
+
 ```bash
-python3 -m http.server 8000   # then open http://localhost:8000
+./venv/bin/uvicorn server:app --port 8000
 ```
+
+(Serving it standalone with `python3 -m http.server 8000` also works; it then calls the API on
+`http://127.0.0.1:8000` cross-origin.)
+
+**Wired up:** `planTrip`, `mem0Recall`, `mem0Add`, `mem0SaveProfile` and `mem0AddGroup` now call the real
+API. The destination dropdown is populated from `GET /api/destinations`, and lodgings from the chosen
+destination. `mockPlan`/`PLACES`/`SEED` are dead code kept only for reference.
 
 ## Where the backend plugs in
 

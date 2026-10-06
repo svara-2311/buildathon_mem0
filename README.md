@@ -1,6 +1,26 @@
-# Group Trip Planner (backend)
+# GroupTrip
 
-LLM = language, code = optimization, Mem0 = continuity. `app.py` (Streamlit UI) is still to be written; this is the contract for it.
+Shared trip room: travelers add preferences, the app merges them into a group profile with conflict flags,
+and returns three itineraries (Fastest / Max Experience / Cheapest) with scorecards. Feedback goes to memory
+and the trip is re-planned. LLM = language, code = optimization, Mem0 = continuity.
+
+## Run it
+
+```bash
+python3 -m venv venv && ./venv/bin/pip install -r requirements.txt
+./venv/bin/uvicorn server:app --port 8000      # serves the UI and the API on one origin
+```
+
+Open **http://127.0.0.1:8000**. `.env` is optional: without `MEM0_API_KEY` memory is a local JSON file,
+without `ANTHROPIC_API_KEY` explanations and feedback parsing fall back to templates/regex.
+
+## Deploy (Vercel)
+
+`vercel.json` routes every request to `api/index.py`, which serves the same FastAPI app.
+Set `MEM0_API_KEY` and `ANTHROPIC_API_KEY` as project env vars - the filesystem is read-only there,
+so local-JSON memory would not survive and destination editing is disabled (503).
+
+## Python API
 
 ```python
 from data import list_destinations, load_destination, validate_traveler
@@ -40,9 +60,9 @@ explain.explain_replan(result["itineraries"]["cheapest"], result2["itineraries"]
 - `.env`: `ANTHROPIC_API_KEY`, `MEM0_API_KEY`. Both optional; without them the app falls back to local memory and templated explanations.
 - Mem0 2.x needs identity inside `filters={"user_id": ...}`, not as a top-level kwarg. `memory.py` handles that.
 
-## HTTP API for the frontend (`api.py`)
+## HTTP API (`server.py`)
 
-`uvicorn api:app --port 8001` (CORS open; frontend served separately on :8000). Implements the contract in `frontend/README.md`.
+Implements the contract in `frontend/README.md`. The UI is served from the same origin at `/`, so no CORS is needed in the browser (CORS is still open for a separately-served frontend).
 
 | Endpoint | Notes |
 |---|---|
@@ -61,7 +81,7 @@ Group memory is scoped to `room.code` only - a room knows only what it has actua
 ### Memory is always overridable
 `POST /api/plan` takes `settings` (any knob from `GET /api/settings`), `adjustments` (override a memory-derived constraint; `null` clears one), `ignore_memory: true` (plan from the submitted forms alone) and `remember: false` (plan without saving the forms). The response echoes `adjustments_from_memory`, `adjustments` (what was used) and `adjustments_overridden`, so the UI can always show what memory wanted and what the user chose instead. Submitted form values always beat memory.
 
-Vocabulary translation (see `api.py`): pace balanced/packed to moderate/active; views/relax to scenic/coffee; vegan to vegetarian; `diet` list to one value; satisfaction 0-1 to 0-100; plan keys `max_experience` to `max`.
+Vocabulary translation (see `server.py`): pace balanced/packed to moderate/active; views/relax to scenic/coffee; vegan to vegetarian; `diet` list to one value; satisfaction 0-1 to 0-100; plan keys `max_experience` to `max`.
 Group memory is `group:<room.code>`; there is no fallback group.
 
 ## How the three plans are chosen (`planner.plan`)

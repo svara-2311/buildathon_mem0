@@ -12,6 +12,7 @@ stay deterministic; the natural-language text is what Mem0 searches over.
 import json
 import os
 import re
+import tempfile
 import time
 import uuid
 from collections import Counter
@@ -22,7 +23,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DEFAULT_QUERY = "food diet wake-up time pace budget dealbreakers walking"
-LOCAL_PATH = Path(__file__).parent / ".local_memory.json"
+# Local store path: env override first, then next to the code, then /tmp when that is read-only (serverless).
+LOCAL_PATH = Path(os.getenv("TRIP_MEMORY_PATH") or (Path(__file__).parent / ".local_memory.json"))
 
 
 def user_id(name: str) -> str:
@@ -37,7 +39,11 @@ class _LocalStore:
         self.rows = json.loads(path.read_text()) if path.exists() else []
 
     def _save(self):
-        self.path.write_text(json.dumps(self.rows, indent=1))
+        try:
+            self.path.write_text(json.dumps(self.rows, indent=1))
+        except OSError:                      # read-only filesystem: fall back to a writable temp path
+            self.path = Path(tempfile.gettempdir()) / "trip_memory.json"
+            self.path.write_text(json.dumps(self.rows, indent=1))
 
     def add(self, text, uid, metadata=None):
         row = dict(id=uuid.uuid4().hex, memory=text, user_id=uid, metadata=metadata or {}, created_at=time.time())

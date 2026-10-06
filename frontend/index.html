@@ -186,12 +186,12 @@
 
     <div class="card">
       <div class="row">
-        <div class="field"><label>Destination</label><input value="San Francisco" disabled title="Demo data is seeded for SF"></div>
+        <div class="field"><label>Destination</label><select id="dest"></select></div>
         <div class="field"><label>Days</label>
           <select id="days"><option>1</option><option selected>2</option><option>3</option></select></div>
         <div class="field"><label>Start date</label><input id="start" type="date"></div>
         <div class="field"><label>Staying in</label>
-          <select id="lodging"><option>Mission District</option><option>SoMa</option><option>Union Square</option></select></div>
+          <select id="lodging"></select></div>
       </div>
     </div>
 
@@ -321,36 +321,57 @@ const avatar=(name,sz)=>`<div class="avatar" style="background:${COLORS[avIdx(na
    MEMORY SEAM (mock Mem0). Replace the 3 functions below with real calls.
    Everything else only talks to these.
    ===================================================================== */
-let MEM=null;
-function memLoad(){ if(MEM) return MEM; try{MEM=JSON.parse(localStorage.getItem('gt_mem2')||'null');}catch(e){} if(!MEM) MEM=clone(SEED); return MEM; }
-function memSave(){ try{localStorage.setItem('gt_mem2',JSON.stringify(MEM));}catch(e){} }
-const memFacts=name=>(memLoad().users[name.toLowerCase()]||{}).facts||[];
+const API=(location.origin&&location.origin!=='null')?'':'http://127.0.0.1:8000';
+async function api(path,opts){
+  const r=await fetch(API+path,opts);
+  if(r.status===404) return null;
+  if(!r.ok) throw new Error((await r.text()).slice(0,180)||('HTTP '+r.status));
+  return r.json();
+}
+const jpost=(path,body)=>api(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+
+// facts shown in the memory panel, filled from what the backend actually returns
+let FACTS={}, GROUPFACTS=[];
+const memFacts=name=>FACTS[name.toLowerCase()]||[];
 
 async function mem0Recall(name){
-  // REAL: const r=await fetch('/api/memory/recall?user_id='+encodeURIComponent(name)); return r.ok? r.json():null;
-  //       expected: {name, fields:{wake_time,rest_windows,diet,budget_per_day,pace,interests,dealbreakers}, facts:[string]} or null
-  await sleep(450);
-  const rec=memLoad().users[name.trim().toLowerCase()];
-  return rec?clone(rec):null;
+  const q=new URLSearchParams({user_id:name,destination:destKey(),room:room.code});
+  const rec=await api('/api/memory/recall?'+q);
+  if(rec) FACTS[name.toLowerCase()]=rec.facts||[];
+  return rec;
 }
 async function mem0Add(name,text,meta){
-  // REAL: await fetch('/api/memory/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:name,text,metadata:meta})});
-  const u=memLoad().users, k=name.toLowerCase();
-  if(!u[k]) u[k]={name,fields:null,facts:[]};
-  u[k].facts.push(text); memSave();
+  const res=await jpost('/api/memory/add',{name,text,meta:{...meta,room:room.code,destination:destKey()}});
+  (FACTS[name.toLowerCase()]=FACTS[name.toLowerCase()]||[]).push(text);
+  return res;
 }
 async function mem0SaveProfile(m){
-  // REAL: same endpoint as mem0Add, with the profile as natural language or structured fields.
-  const u=memLoad().users, k=m.name.toLowerCase();
-  const fields={wake_time:m.wake_time,rest_windows:m.rest_windows,diet:m.diet,budget_per_day:m.budget_per_day,pace:m.pace,interests:m.interests,dealbreakers:m.dealbreakers};
-  u[k]={name:m.name,fields:clone(fields),facts:(u[k]&&u[k].facts)||[]}; memSave();
+  const {name,wake_time,rest_windows,diet,budget_per_day,pace,interests,dealbreakers}=m;
+  return jpost('/api/memory/add',{name,meta:{type:'profile',room:room.code,destination:destKey(),
+    profile:{name,wake_time,rest_windows,diet,budget_per_day,pace,interests,dealbreakers}}});
 }
-async function mem0AddGroup(code,text){ const g=memLoad().groups; (g[code]=g[code]||[]).push(text); memSave(); }
+async function mem0AddGroup(code,text,mode){
+  const res=await jpost('/api/memory/add',{text,meta:{type:mode?'mode_choice':'group',mode,room:code,destination:destKey()}});
+  GROUPFACTS.push(text);
+  return res;
+}
 
 /* =====================================================================
    STATE
    ===================================================================== */
 const room={code:Math.random().toString(36).slice(2,7).toUpperCase()};
+let DESTS=[], destLabel='';
+const destKey=()=>($('#dest')&&$('#dest').value)||(DESTS[0]&&DESTS[0].name)||'';
+async function loadDests(){
+  DESTS=await api('/api/destinations')||[];
+  $('#dest').innerHTML=DESTS.map(d=>`<option value="${esc(d.name)}">${esc(d.label)}</option>`).join('');
+  await loadLodgings();
+}
+async function loadLodgings(){
+  const d=await api('/api/destinations/'+destKey());
+  destLabel=(DESTS.find(x=>x.name===destKey())||{}).label||destKey();
+  $('#lodging').innerHTML=(d&&d.lodgings||[]).map(l=>`<option>${esc(l.name)}</option>`).join('');
+}
 let members=[], addState='idle', draft=null, result=null, selPlan='fastest', chosenPlan=null, activeDay=0, agentNotes=[];
 $('#roomchip').textContent='Room '+room.code;
 
@@ -485,12 +506,14 @@ async function saveDraft(){
   addState='idle'; draft=null; renderAll();
 }
 async function loadDemo(){
-  for(const n of ['Priya','Sam']){
+  const known=(await api('/api/personas')||[]).filter(p=>p.known).map(p=>p.name);
+  if(!known.length){ toast('No returning travelers yet. Add someone, plan a trip, and they will be remembered.'); return; }
+  for(const n of known){
     if(members.some(m=>m.name===n)) continue;
     const rec=await mem0Recall(n); if(!rec||!rec.fields) continue;
     members.push({...blankDraft(rec.name),...clone(rec.fields),returning:true,fromMem:Object.keys(rec.fields)});
   }
-  renderAll(); toast('Loaded Priya and Sam from memory. Add someone new next.');
+  renderAll(); toast('Loaded '+names(known)+' from memory. Add someone new next.');
 }
 $('#members').addEventListener('click',e=>{ const d=e.target.closest('[data-del]'); if(d){ members.splice(+d.dataset.del,1); renderAll(); } });
 $('#copy').onclick=async()=>{ const url=`https://grouptrip.demo/r/${room.code}`; try{await navigator.clipboard.writeText(url);}catch(e){} toast('Invite link copied (demo link, not live yet)'); };
@@ -503,13 +526,9 @@ $('#copy').onclick=async()=>{ const url=`https://grouptrip.demo/r/${room.code}`;
                 sc:{travel,dwell,cost,sat:{[name]:pct},minSat,meanSat}}]}
    start/end are minutes since midnight.
    ===================================================================== */
-async function planTrip(payload){
-  // const r=await fetch('/api/plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  // if(!r.ok) throw new Error('Planner error '+r.status); return r.json();
-  return mockPlan(payload);
-}
+async function planTrip(payload){ return jpost('/api/plan',payload); }
 function buildPayload(){
-  return {room:{code:room.code,destination:'San Francisco',days:+$('#days').value,start_date:$('#start').value||null,lodging:$('#lodging').value},
+  return {room:{code:room.code,destination:destKey(),days:+$('#days').value,start_date:$('#start').value||null,lodging:$('#lodging').value},
           members:members.map(({name,wake_time,rest_windows,diet,budget_per_day,pace,interests,dealbreakers})=>clone({name,wake_time,rest_windows,diet,budget_per_day,pace,interests,dealbreakers}))};
 }
 
@@ -621,7 +640,7 @@ function routeSVG(p){
 const colorOf=n=>COLORS[avIdx(n)%5];
 function renderPlans(){
   const P=result.plans;
-  $('#ptitle').textContent=`Three ways to do San Francisco`;
+  $('#ptitle').textContent=`Three ways to do ${destLabel||destKey()}`;
   $('#psub').textContent=`${P[0].days.length} day${P[0].days.length>1?'s':''} for ${names(members.map(m=>m.name))}. Select a plan to read its day-by-day.`;
   $('#agentnotes').innerHTML=agentNotes.length?`<div class="card agent"><b>What the agent changed</b><ul>${agentNotes.map(n=>`<li>${esc(n)}</li>`).join('')}</ul></div>`:'';
   const best=METRICS.map(([,fn,,hi])=>{const v=P.map(fn);return hi?Math.max(...v):Math.min(...v);});
@@ -655,7 +674,7 @@ function renderTimeline(){
       <div class="bar">${bar}</div>
       <div class="sb">
         <h3>${esc(s.name)}${s.tag?'<span class="tag">Compromise</span>':''}</h3>
-        <div class="sm">${esc(s.area)}, $${s.cost} per person, until ${fmt(s.end)}, ${s.travel_min} min ${s.travel_how==='walk'?'on foot':'by transit'} to get here</div>
+        <div class="sm">${s.area?esc(s.area)+', ':''}$${s.cost} per person, until ${fmt(s.end)}, ${s.travel_min} min ${s.travel_how==='walk'?'on foot':'by transit'} to get here</div>
         <div class="sw">${esc(s.why)}</div>
       </div>
     </div>`;}).join('')||'<div class="empty">Nothing fit this day under the group constraints. Loosen a dealbreaker or the budget cap.</div>';
@@ -663,42 +682,46 @@ function renderTimeline(){
 function renderFeedback(){
   const cur=$('#fbwho').value;
   $('#fbwho').innerHTML=members.map(m=>`<option ${m.name===cur?'selected':''}>${esc(m.name)}</option>`).join('');
-  const g=memLoad().groups[room.code]||[];
+  const g=GROUPFACTS;
   $('#memlist').innerHTML=members.map(m=>`<div class="mem"><b>${esc(m.name)}</b>: ${memFacts(m.name).length?memFacts(m.name).map(esc).join(' · '):'nothing yet'}</div>`).join('')+
     `<div class="mem"><b>Group ${room.code}</b>: ${g.length?g.map(esc).join(' · '):'nothing yet'}</div>`;
 }
 $('#plans').addEventListener('click',async e=>{
   const ch=e.target.closest('[data-choose]');
   if(ch){ chosenPlan=ch.dataset.choose; selPlan=chosenPlan; const lab=result.plans.find(p=>p.key===chosenPlan).label;
-    await mem0AddGroup(room.code,`Picked ${lab}`); toast(`Group memory updated: picked ${lab}`); renderPlans(); return; }
+    try{ await mem0AddGroup(room.code,`Picked ${lab}`,chosenPlan); toast(`Group memory updated: picked ${lab}`); }
+    catch(err){ toast('Could not save the pick: '+err.message); }
+    renderPlans(); return; }
   const c=e.target.closest('[data-plan]'); if(c){ selPlan=c.dataset.plan; renderPlans(); }
 });
 $('#tabs').addEventListener('click',e=>{ const t=e.target.closest('[data-day]'); if(t){ activeDay=+t.dataset.day; renderTimeline(); $('#tabs').querySelectorAll('.tab').forEach((x,i)=>x.classList.toggle('on',i===activeDay)); } });
 document.querySelectorAll('[data-fb]').forEach(c=>c.onclick=()=>{ $('#fbtext').value=c.dataset.fb; });
 
-/* ---------- FEEDBACK -> MEMORY -> RE-PLAN (mock LLM extraction) ---------- */
+/* ---------- FEEDBACK -> MEMORY -> RE-PLAN (real: Claude parses it into constraints) ---------- */
 $('#replan').onclick=async()=>{
   const text=($('#fbtext').value||'').trim(); if(!text){ toast('Type some feedback first'); return; }
   const who=members.find(m=>m.name===$('#fbwho').value)||members[0];
-  const t=text.toLowerCase(), notes=[]; const add=(arr,v)=>{ if(!arr.includes(v)) arr.push(v); };
-  const isWalk=/walk|hike|steep|hill/.test(t);
-  if(isWalk){ add(who.dealbreakers,'long walks'); notes.push(`Weighted travel time and walking more heavily because ${who.name} flagged it.`); }
-  if(/early|morning/.test(t)){ if(toMin(who.wake_time)<600) who.wake_time='10:00'; add(who.dealbreakers,'early mornings'); notes.push(`Pushed the day start later for ${who.name}.`); }
-  if(/expens|pricey|cost|cheaper|budget/.test(t)){ who.budget_per_day=Math.max(40,Math.round(who.budget_per_day*0.8/10)*10); notes.push(`Lowered ${who.name}'s daily cap to $${who.budget_per_day}.`); }
-  if(/late|night/.test(t)){ add(who.dealbreakers,'late nights'); notes.push(`Ended the days earlier for ${who.name}.`); }
-  if(!isWalk&&/packed|tired|rushed|too much|exhaust/.test(t)){ who.pace='relaxed'; notes.push(`Moved ${who.name} to a relaxed pace.`); }
-  if(!notes.length) notes.push(`Noted "${text}" for ${who.name}. No hard constraint changed, so the plans stay similar.`);
   $('#replan').disabled=true; $('#replan').textContent='Re-planning…';
   try{
-    const prev=result.plans.find(p=>p.key===selPlan);
-    const low=Object.entries(prev.sc.sat).sort((a,b)=>a[1]-b[1])[0][0];
-    await mem0Add(who.name,`Feedback on ${room.code}: ${text}`,{trip:room.code,type:'feedback'});
-    await mem0SaveProfile(who);
-    if(!memFacts(low).some(f=>f.includes(room.code)&&/compromis/i.test(f))) await mem0Add(low,`Took the lowest-fit plan on ${room.code} (compromised)`,{trip:room.code,type:'fairness'});
-    await sleep(900);
+    const prev=result&&result.plans.find(p=>p.key===selPlan);
+    const res=await mem0Add(who.name,text,{type:'feedback'});
+    const notes=[];
+    const adj=(res&&res.adjustments)||{};
+    if(adj.max_walk_min) notes.push(`Capped walking at ${adj.max_walk_min} min per stop because ${who.name} flagged it.`);
+    if(adj.max_stops_per_day) notes.push(`Limited the group to ${adj.max_stops_per_day} activities a day.`);
+    if(adj.avoid_tags&&adj.avoid_tags.length) notes.push(`Avoiding ${adj.avoid_tags.join(', ')} from now on.`);
+    if(adj.avoid_ids&&adj.avoid_ids.length) notes.push(`Dropped ${adj.avoid_ids.length} place(s) ${who.name} did not want.`);
+    if(!Object.keys(adj).length) notes.push(`Saved "${text}" to ${who.name}'s memory. It did not imply a hard constraint, so the plans stay similar.`);
+    if(prev){
+      const low=Object.entries(prev.sc.sat).sort((a,b)=>a[1]-b[1])[0][0];
+      if(low!==who.name) await mem0Add(low,`${low} took the lowest-fit plan on ${room.code} (compromised)`,{type:'compromise'});
+    }
     result=await planTrip(buildPayload());
-    if(result.priority) notes.push(`${result.priority} gets the dinner pick because they compromised last trip.`);
-    notes.push('Saved the feedback to memory so future plans start from it.');
+    (result.agent_notes||[]).forEach(x=>{ if(!notes.includes(x)) notes.push(x); });
+    if(result.priority) notes.push(`${result.priority} gets priority on contested picks: memory says they have given up the most.`);
+    const ch=result.plans.find(p=>p.key===selPlan);
+    if(ch&&ch.changes&&(ch.changes.removed.length||ch.changes.added.length))
+      notes.push(`In ${ch.label}: dropped ${ch.changes.removed.join(', ')||'nothing'}; added ${ch.changes.added.join(', ')||'nothing'} (${ch.changes.travel_delta>=0?'+':''}${ch.changes.travel_delta} min travel, ${ch.changes.cost_delta>=0?'+':''}$${Math.round(ch.changes.cost_delta)}).`);
     agentNotes=notes; $('#fbtext').value='';
     renderPlans(); renderGroup(); renderMembers(); toast('Memory updated and plans re-run');
   }catch(err){ toast('Re-plan failed: '+err.message); }
@@ -728,7 +751,8 @@ document.querySelectorAll('.bnav button').forEach(b=>b.onclick=()=>{
   else if(n==='plans'){ show('plans'); }
   else { show('plans'); setTimeout(()=>$('#fbcard').scrollIntoView({behavior:'smooth'}),50); }
 });
-renderAll();
+$('#dest').onchange=async()=>{ await loadLodgings(); result=null; FACTS={}; GROUPFACTS=[]; renderAll(); toast('Switched to '+destLabel+'. Re-plan to see it.'); };
+loadDests().then(renderAll).catch(err=>{ toast('Backend not reachable: '+err.message); renderAll(); });
 </script>
 </body>
 </html>

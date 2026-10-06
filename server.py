@@ -1,7 +1,10 @@
-"""HTTP adapter for the static frontend (frontend/README.md). Translates the UI contract to/from the planner,
-memory and explain modules; no planning logic lives here.  Run: uvicorn api:app --port 8001"""
+"""HTTP adapter + static host for the GroupTrip UI. Translates the frontend contract to/from the planner,
+memory and explain modules; no planning logic lives here.  Run: uvicorn server:app --port 8000"""
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 import explain
@@ -264,6 +267,8 @@ def _save(d: dict) -> dict:
         write_destination_raw(d)
     except ValueError as e:
         raise HTTPException(422, str(e))
+    except OSError as e:
+        raise HTTPException(503, f"destination files are read-only here ({e.strerror}); edit them locally")
     return d
 
 
@@ -315,3 +320,17 @@ def api_patch_travel(name: str, body: dict):
     d["travel"] = {**d["travel"], **body}
     _save(d)
     return d["travel"]
+
+
+# ---------- static UI (same origin as the API, so no CORS in the browser) ----------
+FRONTEND = Path(__file__).parent / "frontend"
+
+
+@app.get("/", include_in_schema=False)
+def index():
+    return FileResponse(FRONTEND / "index.html")
+
+
+@app.get("/health", include_in_schema=False)
+def health():
+    return dict(ok=True, backend=mem.backend, destinations=[d["name"] for d in list_destinations()])
