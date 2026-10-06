@@ -16,9 +16,14 @@ without `ANTHROPIC_API_KEY` explanations and feedback parsing fall back to templ
 
 ## Deploy (Vercel)
 
-`vercel.json` routes every request to `api/index.py`, which serves the same FastAPI app.
-Set `MEM0_API_KEY` and `ANTHROPIC_API_KEY` as project env vars - the filesystem is read-only there,
-so local-JSON memory would not survive and destination editing is disabled (503).
+`vercel.json` routes every request to `api/index.py`, which serves the same FastAPI app, and `includeFiles`
+bundles the root modules plus `destinations/` and `frontend/` (import tracing alone does not pick up the
+JSON data or the HTML). Do not pin the Python runtime version - that fails the build with
+`pin-version-mismatch`; Vercel picks the runtime from `requirements.txt`.
+
+Set `MEM0_API_KEY` and `ANTHROPIC_API_KEY` as project env vars. The filesystem is read-only there, so
+local-JSON memory falls back to `/tmp` (lost on cold start - use a real Mem0 key for a live demo) and
+destination editing returns 503.
 
 ## Python API
 

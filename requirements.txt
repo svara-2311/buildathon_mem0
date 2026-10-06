@@ -1,6 +1,5 @@
-streamlit
+fastapi
+uvicorn
 mem0ai
 anthropic
 python-dotenv
-fastapi
-uvicorn

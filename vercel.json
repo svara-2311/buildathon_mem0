@@ -1,5 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "functions": { "api/index.py": { "runtime": "@vercel/python@4.3.0", "maxDuration": 60 } },
+  "functions": {
+    "api/index.py": {
+      "includeFiles": "{server.py,planner.py,memory.py,explain.py,data.py,seed_memory.py,personas.json,destinations/**,frontend/**}"
+    }
+  },
   "rewrites": [{ "source": "/(.*)", "destination": "/api/index.py" }]
 }
