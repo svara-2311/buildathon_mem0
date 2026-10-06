@@ -1,5 +1,7 @@
 """HTTP adapter + static host for the GroupTrip UI. Translates the frontend contract to/from the planner,
 memory and explain modules; no planning logic lives here.  Run: uvicorn server:app --port 8000"""
+import os
+import tempfile
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -16,7 +18,15 @@ from seed_memory import seed
 
 app = FastAPI(title="Group Trip Planner API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
-mem = TripMemory()
+
+# Never let memory setup kill the whole function: a bad MEM0_API_KEY or a read-only filesystem
+# must degrade to local storage, not a 500 on every route. /health reports what happened.
+MEM_ERROR = None
+try:
+    mem = TripMemory()
+except Exception as e:                                  # noqa: BLE001 - any client/config failure
+    MEM_ERROR = f"{type(e).__name__}: {e}"
+    mem = TripMemory(local_path=Path(tempfile.gettempdir()) / "trip_memory.json")
 _last_plan: dict[str, dict] = {}   # room code -> previous planner result, for re-plan diffs
 
 # ---------- vocab translation (frontend <-> backend) ----------
@@ -328,9 +338,21 @@ FRONTEND = Path(__file__).parent / "frontend"
 
 @app.get("/", include_in_schema=False)
 def index():
-    return FileResponse(FRONTEND / "index.html")
+    page = FRONTEND / "index.html"
+    if not page.exists():
+        raise HTTPException(503, f"UI not bundled with this deployment (looked in {FRONTEND})")
+    return FileResponse(page)
 
 
 @app.get("/health", include_in_schema=False)
 def health():
-    return dict(ok=True, backend=mem.backend, destinations=[d["name"] for d in list_destinations()])
+    """Reports what is actually working, so a broken deployment says why instead of returning 500."""
+    try:
+        dests = [d["name"] for d in list_destinations()]
+        dest_error = None
+    except Exception as e:                              # noqa: BLE001
+        dests, dest_error = [], f"{type(e).__name__}: {e}"
+    return dict(ok=bool(dests) and not MEM_ERROR, backend=mem.backend, destinations=dests,
+                memory_path=str(mem.local.path) if mem.local else None, memory_error=MEM_ERROR,
+                destinations_error=dest_error, ui_bundled=(FRONTEND / "index.html").exists(),
+                anthropic_key=bool(os.getenv("ANTHROPIC_API_KEY")), mem0_key=bool(os.getenv("MEM0_API_KEY")))
