@@ -1,0 +1,472 @@
+{
+ "name": "yellowstone",
+ "label": "Yellowstone National Park",
+ "travel": {
+  "mode": "driving",
+  "speed_kmh": 55,
+  "detour_factor": 1.7,
+  "overrides": {
+   "old_faithful|lamar_valley": 150,
+   "lamar_valley|old_faithful": 150,
+   "ofl|lamar_valley": 150,
+   "lamar_valley|ofl": 150
+  },
+  "cost_per_min": 0.25
+ },
+ "day_window": [
+  "06:00",
+  "21:00"
+ ],
+ "lodgings": [
+  {
+   "id": "ofl",
+   "name": "Old Faithful Lodge",
+   "lat": 44.459,
+   "lng": -110.831,
+   "cost_per_night": 0
+  },
+  {
+   "id": "canyon_lodge",
+   "name": "Canyon Lodge & Cabins",
+   "lat": 44.7345,
+   "lng": -110.4885,
+   "cost_per_night": 0
+  },
+  {
+   "id": "west_yellowstone",
+   "name": "West Yellowstone Airbnb",
+   "lat": 44.6621,
+   "lng": -111.1041,
+   "cost_per_night": 0
+  }
+ ],
+ "places": [
+  {
+   "id": "old_faithful",
+   "name": "Old Faithful & Upper Geyser Basin",
+   "lat": 44.4605,
+   "lng": -110.8281,
+   "cost": 0,
+   "duration_min": 90,
+   "tags": [
+    "geysers",
+    "scenic",
+    "photography"
+   ],
+   "hours": [
+    "06:00",
+    "21:00"
+   ],
+   "walk_min": 35,
+   "best_time": "any"
+  },
+  {
+   "id": "observation_pt",
+   "name": "Observation Point Hike",
+   "lat": 44.465,
+   "lng": -110.83,
+   "cost": 0,
+   "duration_min": 60,
+   "tags": [
+    "hiking",
+    "scenic",
+    "photography",
+    "sunsets"
+   ],
+   "hours": [
+    "06:00",
+    "20:00"
+   ],
+   "walk_min": 50,
+   "best_time": "any"
+  },
+  {
+   "id": "grand_prismatic",
+   "name": "Grand Prismatic Spring Overlook",
+   "lat": 44.5236,
+   "lng": -110.8346,
+   "cost": 0,
+   "duration_min": 60,
+   "tags": [
+    "scenic",
+    "photography",
+    "hiking"
+   ],
+   "hours": [
+    "07:00",
+    "20:00"
+   ],
+   "walk_min": 25,
+   "best_time": "any"
+  },
+  {
+   "id": "midway_geyser",
+   "name": "Midway Geyser Basin Boardwalk",
+   "lat": 44.5251,
+   "lng": -110.8383,
+   "cost": 0,
+   "duration_min": 45,
+   "tags": [
+    "geysers",
+    "scenic",
+    "photography"
+   ],
+   "hours": [
+    "07:00",
+    "20:00"
+   ],
+   "walk_min": 20,
+   "best_time": "any"
+  },
+  {
+   "id": "norris_geyser",
+   "name": "Norris Geyser Basin",
+   "lat": 44.727,
+   "lng": -110.705,
+   "cost": 0,
+   "duration_min": 90,
+   "tags": [
+    "geysers",
+    "scenic",
+    "photography"
+   ],
+   "hours": [
+    "08:00",
+    "19:00"
+   ],
+   "walk_min": 40,
+   "best_time": "any"
+  },
+  {
+   "id": "albright_museum",
+   "name": "Albright Visitor Center & Museum",
+   "lat": 44.9768,
+   "lng": -110.704,
+   "cost": 0,
+   "duration_min": 60,
+   "tags": [
+    "museums",
+    "history"
+   ],
+   "hours": [
+    "09:00",
+    "17:00"
+   ],
+   "walk_min": 5,
+   "best_time": "any"
+  },
+  {
+   "id": "mammoth_terraces",
+   "name": "Mammoth Hot Springs Terraces",
+   "lat": 44.9768,
+   "lng": -110.703,
+   "cost": 0,
+   "duration_min": 75,
+   "tags": [
+    "scenic",
+    "photography"
+   ],
+   "hours": [
+    "07:00",
+    "20:00"
+   ],
+   "walk_min": 30,
+   "best_time": "any"
+  },
+  {
+   "id": "lamar_valley",
+   "name": "Lamar Valley Wildlife Watching",
+   "lat": 44.897,
+   "lng": -110.25,
+   "cost": 0,
+   "duration_min": 120,
+   "tags": [
+    "wildlife",
+    "photography",
+    "scenic"
+   ],
+   "hours": [
+    "05:00",
+    "21:00"
+   ],
+   "walk_min": 5,
+   "best_time": "dawn"
+  },
+  {
+   "id": "hayden_valley",
+   "name": "Hayden Valley Wildlife Pullouts",
+   "lat": 44.65,
+   "lng": -110.47,
+   "cost": 0,
+   "duration_min": 75,
+   "tags": [
+    "wildlife",
+    "photography",
+    "scenic"
+   ],
+   "hours": [
+    "05:00",
+    "21:00"
+   ],
+   "walk_min": 10,
+   "best_time": "dawn"
+  },
+  {
+   "id": "artist_point",
+   "name": "Artist Point (Grand Canyon of the Yellowstone)",
+   "lat": 44.7222,
+   "lng": -110.4797,
+   "cost": 0,
+   "duration_min": 45,
+   "tags": [
+    "scenic",
+    "photography",
+    "sunsets"
+   ],
+   "hours": [
+    "06:00",
+    "21:00"
+   ],
+   "walk_min": 15,
+   "best_time": "any"
+  },
+  {
+   "id": "uncle_toms",
+   "name": "Uncle Tom's Trail to Lower Falls",
+   "lat": 44.7185,
+   "lng": -110.495,
+   "cost": 0,
+   "duration_min": 60,
+   "tags": [
+    "hiking",
+    "scenic",
+    "photography"
+   ],
+   "hours": [
+    "07:00",
+    "20:00"
+   ],
+   "walk_min": 45,
+   "best_time": "any"
+  },
+  {
+   "id": "mt_washburn",
+   "name": "Mount Washburn Summit Hike",
+   "lat": 44.7977,
+   "lng": -110.4338,
+   "cost": 0,
+   "duration_min": 210,
+   "tags": [
+    "hiking",
+    "wildlife",
+    "scenic",
+    "photography"
+   ],
+   "hours": [
+    "06:00",
+    "17:00"
+   ],
+   "walk_min": 150,
+   "best_time": "day"
+  },
+  {
+   "id": "west_thumb",
+   "name": "West Thumb Geyser Basin",
+   "lat": 44.415,
+   "lng": -110.574,
+   "cost": 0,
+   "duration_min": 45,
+   "tags": [
+    "geysers",
+    "scenic",
+    "photography",
+    "sunsets"
+   ],
+   "hours": [
+    "08:00",
+    "20:00"
+   ],
+   "walk_min": 20,
+   "best_time": "any"
+  },
+  {
+   "id": "fishing_bridge",
+   "name": "Yellowstone Lake & Fishing Bridge",
+   "lat": 44.564,
+   "lng": -110.379,
+   "cost": 0,
+   "duration_min": 45,
+   "tags": [
+    "scenic",
+    "photography",
+    "wildlife",
+    "sunsets"
+   ],
+   "hours": [
+    "06:00",
+    "21:00"
+   ],
+   "walk_min": 10,
+   "best_time": "any"
+  },
+  {
+   "id": "ofi_dining",
+   "name": "Old Faithful Inn Dining Room",
+   "lat": 44.4601,
+   "lng": -110.8317,
+   "cost": 45,
+   "duration_min": 75,
+   "tags": [
+    "food"
+   ],
+   "hours": [
+    "11:30",
+    "21:00"
+   ],
+   "walk_min": 5,
+   "best_time": "any",
+   "meal": "dinner",
+   "diet_ok": [
+    "vegetarian",
+    "pescatarian"
+   ]
+  },
+  {
+   "id": "canyon_eatery",
+   "name": "Canyon Lodge Eatery",
+   "lat": 44.735,
+   "lng": -110.487,
+   "cost": 18,
+   "duration_min": 50,
+   "tags": [
+    "food",
+    "street_food"
+   ],
+   "hours": [
+    "11:00",
+    "20:00"
+   ],
+   "walk_min": 5,
+   "best_time": "any",
+   "meal": "lunch",
+   "diet_ok": [
+    "vegetarian",
+    "pescatarian"
+   ]
+  },
+  {
+   "id": "mammoth_grill",
+   "name": "Mammoth Terrace Grill",
+   "lat": 44.9769,
+   "lng": -110.7025,
+   "cost": 15,
+   "duration_min": 45,
+   "tags": [
+    "food",
+    "street_food"
+   ],
+   "hours": [
+    "11:00",
+    "19:00"
+   ],
+   "walk_min": 5,
+   "best_time": "any",
+   "meal": "lunch",
+   "diet_ok": [
+    "vegetarian"
+   ]
+  },
+  {
+   "id": "lake_hotel_dining",
+   "name": "Lake Yellowstone Hotel Dining Room",
+   "lat": 44.5524,
+   "lng": -110.3995,
+   "cost": 55,
+   "duration_min": 90,
+   "tags": [
+    "food",
+    "sunsets"
+   ],
+   "hours": [
+    "11:30",
+    "21:00"
+   ],
+   "walk_min": 5,
+   "best_time": "any",
+   "meal": "dinner",
+   "diet_ok": [
+    "vegetarian",
+    "pescatarian"
+   ]
+  },
+  {
+   "id": "roosevelt_lodge",
+   "name": "Roosevelt Lodge Dining Room",
+   "lat": 44.917,
+   "lng": -110.418,
+   "cost": 28,
+   "duration_min": 70,
+   "tags": [
+    "food",
+    "street_food"
+   ],
+   "hours": [
+    "11:30",
+    "20:30"
+   ],
+   "walk_min": 5,
+   "best_time": "any",
+   "meal": "dinner",
+   "diet_ok": [
+    "vegetarian",
+    "pescatarian"
+   ]
+  },
+  {
+   "id": "grant_village_cafe",
+   "name": "Grant Village Lodge Cafe",
+   "lat": 44.393,
+   "lng": -110.564,
+   "cost": 14,
+   "duration_min": 40,
+   "tags": [
+    "food",
+    "coffee"
+   ],
+   "hours": [
+    "07:00",
+    "20:00"
+   ],
+   "walk_min": 5,
+   "best_time": "any",
+   "meal": "lunch",
+   "diet_ok": [
+    "vegetarian",
+    "pescatarian"
+   ]
+  },
+  {
+   "id": "wy_pizza",
+   "name": "West Yellowstone Pizza & Brews",
+   "lat": 44.6621,
+   "lng": -111.1041,
+   "cost": 16,
+   "duration_min": 60,
+   "tags": [
+    "food",
+    "street_food",
+    "nightlife"
+   ],
+   "hours": [
+    "11:00",
+    "22:00"
+   ],
+   "walk_min": 5,
+   "best_time": "any",
+   "meal": "dinner",
+   "diet_ok": [
+    "vegetarian"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Nehmat",
+    "wake_time": "09:30",
+    "rest_windows": ["14:00-15:00"],
+    "diet": "vegetarian",
+    "budget_per_day": 120,
+    "pace": "relaxed",
+    "interests": ["museums", "coffee", "scenic"],
+    "dealbreakers": ["early mornings", "long walks"]
+  },
+  {
+    "name": "Svara",
+    "wake_time": "06:30",
+    "rest_windows": [],
+    "diet": "omnivore",
+    "budget_per_day": 80,
+    "pace": "active",
+    "interests": ["hiking", "wildlife", "street_food"],
+    "dealbreakers": ["tourist traps"]
+  },
+  {
+    "name": "Aanchal",
+    "wake_time": "08:30",
+    "rest_windows": [],
+    "diet": "pescatarian",
+    "budget_per_day": 200,
+    "pace": "moderate",
+    "interests": ["food", "nightlife", "sunsets", "photography"],
+    "dealbreakers": ["chain restaurants"]
+  }
+]

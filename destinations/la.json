@@ -1,0 +1,437 @@
+{
+ "name": "la",
+ "label": "Los Angeles",
+ "travel": {
+  "mode": "driving",
+  "speed_kmh": 32,
+  "detour_factor": 1.4,
+  "overrides": {},
+  "cost_per_min": 0.2
+ },
+ "day_window": [
+  "07:00",
+  "23:00"
+ ],
+ "lodgings": [
+  {
+   "id": "silver_lake",
+   "name": "Silver Lake Airbnb",
+   "lat": 34.087,
+   "lng": -118.27,
+   "cost_per_night": 0
+  },
+  {
+   "id": "santa_monica_hotel",
+   "name": "Santa Monica Hotel",
+   "lat": 34.0195,
+   "lng": -118.4912,
+   "cost_per_night": 0
+  }
+ ],
+ "places": [
+  {
+   "id": "griffith_obs",
+   "name": "Griffith Observatory",
+   "lat": 34.1184,
+   "lng": -118.3004,
+   "cost": 0,
+   "duration_min": 90,
+   "tags": [
+    "museums",
+    "scenic",
+    "photography",
+    "sunsets"
+   ],
+   "hours": [
+    "12:00",
+    "22:00"
+   ],
+   "walk_min": 15,
+   "best_time": "any"
+  },
+  {
+   "id": "hollywood_sign_hike",
+   "name": "Brush Canyon Hollywood Sign Hike",
+   "lat": 34.129,
+   "lng": -118.301,
+   "cost": 0,
+   "duration_min": 150,
+   "tags": [
+    "hiking",
+    "scenic",
+    "photography"
+   ],
+   "hours": [
+    "06:00",
+    "19:30"
+   ],
+   "walk_min": 120,
+   "best_time": "any"
+  },
+  {
+   "id": "runyon",
+   "name": "Runyon Canyon Hike",
+   "lat": 34.1055,
+   "lng": -118.351,
+   "cost": 0,
+   "duration_min": 90,
+   "tags": [
+    "hiking",
+    "scenic",
+    "photography"
+   ],
+   "hours": [
+    "06:00",
+    "20:00"
+   ],
+   "walk_min": 80,
+   "best_time": "any"
+  },
+  {
+   "id": "getty",
+   "name": "The Getty Center",
+   "lat": 34.078,
+   "lng": -118.4741,
+   "cost": 0,
+   "duration_min": 150,
+   "tags": [
+    "museums",
+    "scenic",
+    "photography"
+   ],
+   "hours": [
+    "10:00",
+    "17:30"
+   ],
+   "walk_min": 40,
+   "best_time": "any"
+  },
+  {
+   "id": "lacma",
+   "name": "LACMA",
+   "lat": 34.0639,
+   "lng": -118.3592,
+   "cost": 25,
+   "duration_min": 120,
+   "tags": [
+    "museums"
+   ],
+   "hours": [
+    "11:00",
+    "17:00"
+   ],
+   "walk_min": 25,
+   "best_time": "any"
+  },
+  {
+   "id": "the_broad",
+   "name": "The Broad",
+   "lat": 34.0544,
+   "lng": -118.2506,
+   "cost": 0,
+   "duration_min": 90,
+   "tags": [
+    "museums",
+    "photography"
+   ],
+   "hours": [
+    "11:00",
+    "17:00"
+   ],
+   "walk_min": 15,
+   "best_time": "any"
+  },
+  {
+   "id": "santa_monica_pier",
+   "name": "Santa Monica Pier",
+   "lat": 34.0094,
+   "lng": -118.4973,
+   "cost": 0,
+   "duration_min": 75,
+   "tags": [
+    "scenic",
+    "sunsets",
+    "photography",
+    "nightlife",
+    "tourist_trap"
+   ],
+   "hours": [
+    "08:00",
+    "23:00"
+   ],
+   "walk_min": 25,
+   "best_time": "any"
+  },
+  {
+   "id": "venice_boardwalk",
+   "name": "Venice Beach Boardwalk",
+   "lat": 33.985,
+   "lng": -118.4695,
+   "cost": 0,
+   "duration_min": 90,
+   "tags": [
+    "scenic",
+    "photography",
+    "street_food"
+   ],
+   "hours": [
+    "08:00",
+    "21:00"
+   ],
+   "walk_min": 45,
+   "best_time": "any"
+  },
+  {
+   "id": "abbot_kinney",
+   "name": "Abbot Kinney Boulevard",
+   "lat": 33.9918,
+   "lng": -118.471,
+   "cost": 0,
+   "duration_min": 75,
+   "tags": [
+    "coffee",
+    "food",
+    "photography"
+   ],
+   "hours": [
+    "09:00",
+    "21:00"
+   ],
+   "walk_min": 30,
+   "best_time": "any"
+  },
+  {
+   "id": "echo_park",
+   "name": "Echo Park Lake",
+   "lat": 34.0725,
+   "lng": -118.2606,
+   "cost": 0,
+   "duration_min": 45,
+   "tags": [
+    "scenic",
+    "photography",
+    "coffee"
+   ],
+   "hours": [
+    "06:00",
+    "21:00"
+   ],
+   "walk_min": 20,
+   "best_time": "any"
+  },
+  {
+   "id": "hollywood_walk",
+   "name": "Hollywood Walk of Fame",
+   "lat": 34.1016,
+   "lng": -118.3267,
+   "cost": 0,
+   "duration_min": 60,
+   "tags": [
+    "nightlife",
+    "tourist_trap"
+   ],
+   "hours": [
+    "00:00",
+    "23:59"
+   ],
+   "walk_min": 30,
+   "best_time": "any"
+  },
+  {
+   "id": "little_tokyo",
+   "name": "Little Tokyo",
+   "lat": 34.0502,
+   "lng": -118.2399,
+   "cost": 0,
+   "duration_min": 75,
+   "tags": [
+    "street_food",
+    "photography"
+   ],
+   "hours": [
+    "10:00",
+    "21:00"
+   ],
+   "walk_min": 25,
+   "best_time": "any"
+  },
+  {
+   "id": "zuma",
+   "name": "Zuma Beach Sunset",
+   "lat": 34.015,
+   "lng": -118.822,
+   "cost": 0,
+   "duration_min": 90,
+   "tags": [
+    "scenic",
+    "sunsets",
+    "photography",
+    "wildlife"
+   ],
+   "hours": [
+    "06:00",
+    "21:00"
+   ],
+   "walk_min": 20,
+   "best_time": "any"
+  },
+  {
+   "id": "gcm",
+   "name": "Grand Central Market",
+   "lat": 34.0509,
+   "lng": -118.249,
+   "cost": 18,
+   "duration_min": 60,
+   "tags": [
+    "food",
+    "street_food"
+   ],
+   "hours": [
+    "08:00",
+    "21:00"
+   ],
+   "walk_min": 10,
+   "best_time": "any",
+   "meal": "lunch",
+   "diet_ok": [
+    "vegetarian",
+    "pescatarian"
+   ]
+  },
+  {
+   "id": "intelligentsia",
+   "name": "Intelligentsia Silver Lake",
+   "lat": 34.087,
+   "lng": -118.271,
+   "cost": 8,
+   "duration_min": 40,
+   "tags": [
+    "coffee"
+   ],
+   "hours": [
+    "07:00",
+    "19:00"
+   ],
+   "walk_min": 5,
+   "best_time": "any",
+   "meal": "lunch",
+   "diet_ok": [
+    "vegetarian",
+    "pescatarian"
+   ]
+  },
+  {
+   "id": "in_n_out",
+   "name": "In-N-Out Hollywood",
+   "lat": 34.098,
+   "lng": -118.34,
+   "cost": 10,
+   "duration_min": 35,
+   "tags": [
+    "food",
+    "chain",
+    "street_food"
+   ],
+   "hours": [
+    "10:30",
+    "01:00"
+   ],
+   "walk_min": 5,
+   "best_time": "any",
+   "meal": "lunch",
+   "diet_ok": [
+    "vegetarian"
+   ]
+  },
+  {
+   "id": "sugarfish",
+   "name": "Sugarfish DTLA",
+   "lat": 34.0455,
+   "lng": -118.254,
+   "cost": 60,
+   "duration_min": 75,
+   "tags": [
+    "food"
+   ],
+   "hours": [
+    "11:30",
+    "21:30"
+   ],
+   "walk_min": 5,
+   "best_time": "any",
+   "meal": "dinner",
+   "diet_ok": [
+    "pescatarian"
+   ]
+  },
+  {
+   "id": "gjelina",
+   "name": "Gjelina",
+   "lat": 33.9925,
+   "lng": -118.473,
+   "cost": 55,
+   "duration_min": 90,
+   "tags": [
+    "food",
+    "nightlife"
+   ],
+   "hours": [
+    "11:00",
+    "23:00"
+   ],
+   "walk_min": 5,
+   "best_time": "any",
+   "meal": "dinner",
+   "diet_ok": [
+    "vegetarian",
+    "pescatarian"
+   ]
+  },
+  {
+   "id": "howlin",
+   "name": "Little Dom's Seafood",
+   "lat": 34.11,
+   "lng": -118.27,
+   "cost": 45,
+   "duration_min": 80,
+   "tags": [
+    "food",
+    "nightlife"
+   ],
+   "hours": [
+    "17:00",
+    "22:00"
+   ],
+   "walk_min": 5,
+   "best_time": "any",
+   "meal": "dinner",
+   "diet_ok": [
+    "pescatarian",
+    "vegetarian"
+   ]
+  },
+  {
+   "id": "tacos_la",
+   "name": "Leo's Tacos Truck",
+   "lat": 34.085,
+   "lng": -118.35,
+   "cost": 9,
+   "duration_min": 30,
+   "tags": [
+    "food",
+    "street_food"
+   ],
+   "hours": [
+    "11:00",
+    "23:00"
+   ],
+   "walk_min": 5,
+   "best_time": "any",
+   "meal": "dinner",
+   "diet_ok": [
+    "vegetarian",
+    "pescatarian"
+   ]
+  }
+ ]
+}

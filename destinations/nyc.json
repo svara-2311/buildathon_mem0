@@ -1,0 +1,434 @@
+{
+ "name": "nyc",
+ "label": "New York City",
+ "travel": {
+  "mode": "subway_walk",
+  "speed_kmh": 14,
+  "detour_factor": 1.3,
+  "overrides": {},
+  "cost_per_min": 0.1
+ },
+ "day_window": [
+  "07:00",
+  "23:00"
+ ],
+ "lodgings": [
+  {
+   "id": "les_airbnb",
+   "name": "Lower East Side Airbnb",
+   "lat": 40.715,
+   "lng": -73.9843,
+   "cost_per_night": 0
+  },
+  {
+   "id": "midtown_hotel",
+   "name": "Midtown Hotel",
+   "lat": 40.7549,
+   "lng": -73.984,
+   "cost_per_night": 0
+  }
+ ],
+ "places": [
+  {
+   "id": "central_park",
+   "name": "Central Park (Bethesda & Bow Bridge)",
+   "lat": 40.774,
+   "lng": -73.971,
+   "cost": 0,
+   "duration_min": 90,
+   "tags": [
+    "scenic",
+    "photography"
+   ],
+   "hours": [
+    "06:00",
+    "23:00"
+   ],
+   "walk_min": 50,
+   "best_time": "any"
+  },
+  {
+   "id": "the_met",
+   "name": "The Metropolitan Museum of Art",
+   "lat": 40.7794,
+   "lng": -73.9632,
+   "cost": 30,
+   "duration_min": 150,
+   "tags": [
+    "museums"
+   ],
+   "hours": [
+    "10:00",
+    "17:00"
+   ],
+   "walk_min": 35,
+   "best_time": "any"
+  },
+  {
+   "id": "moma",
+   "name": "MoMA",
+   "lat": 40.7614,
+   "lng": -73.9776,
+   "cost": 30,
+   "duration_min": 120,
+   "tags": [
+    "museums",
+    "photography"
+   ],
+   "hours": [
+    "10:30",
+    "17:30"
+   ],
+   "walk_min": 25,
+   "best_time": "any"
+  },
+  {
+   "id": "brooklyn_bridge",
+   "name": "Brooklyn Bridge Walk",
+   "lat": 40.7061,
+   "lng": -73.9969,
+   "cost": 0,
+   "duration_min": 60,
+   "tags": [
+    "scenic",
+    "photography",
+    "sunsets"
+   ],
+   "hours": [
+    "00:00",
+    "23:59"
+   ],
+   "walk_min": 50,
+   "best_time": "any"
+  },
+  {
+   "id": "dumbo",
+   "name": "DUMBO & Brooklyn Bridge Park",
+   "lat": 40.7033,
+   "lng": -73.9881,
+   "cost": 0,
+   "duration_min": 75,
+   "tags": [
+    "scenic",
+    "photography",
+    "sunsets",
+    "coffee"
+   ],
+   "hours": [
+    "07:00",
+    "23:00"
+   ],
+   "walk_min": 35,
+   "best_time": "any"
+  },
+  {
+   "id": "high_line",
+   "name": "The High Line",
+   "lat": 40.748,
+   "lng": -74.0048,
+   "cost": 0,
+   "duration_min": 75,
+   "tags": [
+    "scenic",
+    "photography"
+   ],
+   "hours": [
+    "07:00",
+    "22:00"
+   ],
+   "walk_min": 45,
+   "best_time": "any"
+  },
+  {
+   "id": "liberty_ferry",
+   "name": "Statue of Liberty Ferry",
+   "lat": 40.7033,
+   "lng": -74.017,
+   "cost": 25,
+   "duration_min": 180,
+   "tags": [
+    "scenic",
+    "photography",
+    "tourist_trap"
+   ],
+   "hours": [
+    "09:00",
+    "17:00"
+   ],
+   "walk_min": 40,
+   "best_time": "any"
+  },
+  {
+   "id": "top_of_rock",
+   "name": "Top of the Rock",
+   "lat": 40.7593,
+   "lng": -73.9794,
+   "cost": 40,
+   "duration_min": 60,
+   "tags": [
+    "scenic",
+    "photography",
+    "sunsets",
+    "nightlife",
+    "tourist_trap"
+   ],
+   "hours": [
+    "09:00",
+    "23:00"
+   ],
+   "walk_min": 5,
+   "best_time": "any"
+  },
+  {
+   "id": "memorial_911",
+   "name": "9/11 Memorial & Museum",
+   "lat": 40.7115,
+   "lng": -74.0134,
+   "cost": 26,
+   "duration_min": 120,
+   "tags": [
+    "museums",
+    "history"
+   ],
+   "hours": [
+    "09:00",
+    "19:00"
+   ],
+   "walk_min": 15,
+   "best_time": "any"
+  },
+  {
+   "id": "chelsea_market",
+   "name": "Chelsea Market",
+   "lat": 40.7424,
+   "lng": -74.0061,
+   "cost": 0,
+   "duration_min": 60,
+   "tags": [
+    "food",
+    "street_food",
+    "coffee"
+   ],
+   "hours": [
+    "08:00",
+    "21:00"
+   ],
+   "walk_min": 15,
+   "best_time": "any"
+  },
+  {
+   "id": "washington_sq",
+   "name": "Washington Square Park",
+   "lat": 40.7308,
+   "lng": -73.9973,
+   "cost": 0,
+   "duration_min": 45,
+   "tags": [
+    "photography",
+    "street_food"
+   ],
+   "hours": [
+    "06:00",
+    "23:00"
+   ],
+   "walk_min": 15,
+   "best_time": "any"
+  },
+  {
+   "id": "village_jazz",
+   "name": "Village Jazz Club (Late Set)",
+   "lat": 40.7305,
+   "lng": -74.0004,
+   "cost": 35,
+   "duration_min": 90,
+   "tags": [
+    "nightlife"
+   ],
+   "hours": [
+    "19:00",
+    "23:59"
+   ],
+   "walk_min": 5,
+   "best_time": "any"
+  },
+  {
+   "id": "joes_pizza",
+   "name": "Joe's Pizza",
+   "lat": 40.7305,
+   "lng": -74.0021,
+   "cost": 5,
+   "duration_min": 25,
+   "tags": [
+    "food",
+    "street_food"
+   ],
+   "hours": [
+    "10:00",
+    "23:00"
+   ],
+   "walk_min": 3,
+   "best_time": "any",
+   "meal": "lunch",
+   "diet_ok": [
+    "vegetarian"
+   ]
+  },
+  {
+   "id": "los_tacos",
+   "name": "Los Tacos No.1 (Chelsea Market)",
+   "lat": 40.7425,
+   "lng": -74.006,
+   "cost": 12,
+   "duration_min": 30,
+   "tags": [
+    "food",
+    "street_food"
+   ],
+   "hours": [
+    "09:00",
+    "21:00"
+   ],
+   "walk_min": 3,
+   "best_time": "any",
+   "meal": "lunch",
+   "diet_ok": [
+    "vegetarian",
+    "pescatarian"
+   ]
+  },
+  {
+   "id": "russ_daughters",
+   "name": "Russ & Daughters Cafe",
+   "lat": 40.7223,
+   "lng": -73.9882,
+   "cost": 28,
+   "duration_min": 60,
+   "tags": [
+    "food",
+    "coffee"
+   ],
+   "hours": [
+    "10:00",
+    "16:00"
+   ],
+   "walk_min": 3,
+   "best_time": "any",
+   "meal": "lunch",
+   "diet_ok": [
+    "vegetarian",
+    "pescatarian"
+   ]
+  },
+  {
+   "id": "blue_bottle",
+   "name": "Blue Bottle Coffee",
+   "lat": 40.741,
+   "lng": -73.989,
+   "cost": 8,
+   "duration_min": 30,
+   "tags": [
+    "coffee"
+   ],
+   "hours": [
+    "07:00",
+    "19:00"
+   ],
+   "walk_min": 3,
+   "best_time": "any",
+   "meal": "lunch",
+   "diet_ok": [
+    "vegetarian",
+    "pescatarian"
+   ]
+  },
+  {
+   "id": "superiority",
+   "name": "Superiority Burger",
+   "lat": 40.7242,
+   "lng": -73.983,
+   "cost": 14,
+   "duration_min": 40,
+   "tags": [
+    "food",
+    "street_food"
+   ],
+   "hours": [
+    "11:30",
+    "22:00"
+   ],
+   "walk_min": 3,
+   "best_time": "any",
+   "meal": "dinner",
+   "diet_ok": [
+    "vegetarian",
+    "pescatarian"
+   ]
+  },
+  {
+   "id": "le_bernardin",
+   "name": "Le Bernardin",
+   "lat": 40.7615,
+   "lng": -73.9819,
+   "cost": 185,
+   "duration_min": 120,
+   "tags": [
+    "food",
+    "nightlife"
+   ],
+   "hours": [
+    "17:00",
+    "22:30"
+   ],
+   "walk_min": 3,
+   "best_time": "any",
+   "meal": "dinner",
+   "diet_ok": [
+    "pescatarian"
+   ]
+  },
+  {
+   "id": "katzs",
+   "name": "Katz's Delicatessen",
+   "lat": 40.7223,
+   "lng": -73.9874,
+   "cost": 28,
+   "duration_min": 50,
+   "tags": [
+    "food",
+    "street_food",
+    "tourist_trap"
+   ],
+   "hours": [
+    "08:00",
+    "23:00"
+   ],
+   "walk_min": 3,
+   "best_time": "any",
+   "meal": "dinner",
+   "diet_ok": []
+  },
+  {
+   "id": "dos_caminos",
+   "name": "Dos Caminos (chain)",
+   "lat": 40.757,
+   "lng": -73.986,
+   "cost": 35,
+   "duration_min": 70,
+   "tags": [
+    "food",
+    "chain"
+   ],
+   "hours": [
+    "11:30",
+    "23:00"
+   ],
+   "walk_min": 3,
+   "best_time": "any",
+   "meal": "dinner",
+   "diet_ok": [
+    "vegetarian",
+    "pescatarian"
+   ]
+  }
+ ]
+}
