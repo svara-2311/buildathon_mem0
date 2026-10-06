@@ -17,7 +17,7 @@ The backend serves this file, so just run the server from the repo root and open
 
 **Wired up:** `planTrip`, `mem0Recall`, `mem0Add`, `mem0SaveProfile` and `mem0AddGroup` now call the real
 API. The destination dropdown is populated from `GET /api/destinations`, and lodgings from the chosen
-destination. `mockPlan`/`PLACES`/`SEED` are dead code kept only for reference.
+destination. The mock optimizer, the seeded SF places and the fake Priya/Sam memory are gone.
 
 ## Where the backend plugs in
 
@@ -30,7 +30,7 @@ Everything the UI needs from the backend goes through **three functions** near t
 | `mem0Recall(name)` | `GET /api/memory/recall?user_id=` | Returns remembered profile fields + facts, or `null`. Drives the "from past trips" badges. |
 | `mem0Add(name, text, meta)` / `mem0SaveProfile(m)` / `mem0AddGroup(code, text)` | `POST /api/memory/add` | Feedback, fairness ("compromised") and group-pick writes. |
 
-The mock optimizer (`mockPlan`) and seeded SF places (`PLACES`) can be deleted once `planTrip` calls the real API.
+The mock optimizer and the seeded SF places have been deleted; all trip data now comes from the backend.
 
 ## `POST /api/plan`
 
@@ -38,10 +38,10 @@ Request:
 
 ```json
 {
-  "room": { "code": "AB12C", "destination": "San Francisco", "days": 2, "start_date": null, "lodging": "Mission District" },
+  "room": { "code": "AB12C", "destination": "yellowstone", "days": 2, "start_date": null, "lodging": "Canyon Lodge & Cabins" },
   "members": [
     {
-      "name": "Priya",
+      "name": "Nehmat",
       "wake_time": "09:30",
       "rest_windows": ["14:00-15:00"],
       "diet": ["vegetarian"],
@@ -62,7 +62,7 @@ Response (times are **minutes since midnight**):
 
 ```json
 {
-  "priority": "Sam",
+  "priority": "Svara",
   "plans": [
     {
       "key": "fastest",
@@ -75,14 +75,14 @@ Response (times are **minutes since midnight**):
             "kind": "activity",
             "start": 644, "end": 689, "cost": 12,
             "travel_min": 14, "travel_how": "transit",
-            "matches": ["Priya", "Sam"],
-            "why": "Picked for Priya & Sam.", "tag": null
+            "matches": ["Nehmat", "Svara"],
+            "why": "Picked for Nehmat & Svara.", "tag": null
           }
         ] }
       ],
       "sc": {
         "travel": 149, "dwell": 670, "cost": 152,
-        "sat": { "Priya": 61, "Sam": 87 },
+        "sat": { "Nehmat": 61, "Svara": 87 },
         "minSat": 61, "meanSat": 74
       }
     }
@@ -97,13 +97,13 @@ Response (times are **minutes since midnight**):
 
 ## Memory shapes
 
-`mem0Recall` → `{ "name": "Priya", "fields": { ...same keys as a member... }, "facts": ["Hated the 40-minute walk"] }`
+`mem0Recall` → `{ "name": "Nehmat", "fields": { ...same keys as a member... }, "facts": ["Hated the 40-minute walk"] }`
 
 Facts matching `/gave up|compromis/i` from a *previous* trip are what the mock planner uses for the dinner-pick priority.
 
-## Demo script
+## Demo flow
 
-1. **Load demo room** → Priya and Sam appear pre-filled with "from past trips" badges.
-2. **Add traveler** → type `Jordan` → **Autofill demo details** (wakes at 10:00) → conflict flags appear on the group profile.
-3. **Plan our trip** → three plans with scorecards. Tap a plan to see its timeline.
-4. Give feedback ("Too much walking") → **Re-plan** → agent notes + memory update.
+1. Pick a destination, add travelers. Nobody is remembered on a fresh backend, so the first trip starts from scratch.
+2. Plan the trip. Conflict flags appear on the group profile; three plans come back with scorecards.
+3. Switch the destination. Each traveler's form pre-fills from their last trip, badged `carried`; change a field and it is saved for that destination only.
+4. Pick a plan and give feedback. Claude turns it into constraints, the re-plan shows what changed, and whoever the picks keep serving worst gets priority next time.

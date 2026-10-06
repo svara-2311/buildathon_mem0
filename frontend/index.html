@@ -163,7 +163,7 @@
       <h1>Everyone's list goes in. One route comes out.</h1>
       <p>Add each traveler's preferences, see where they clash, and compare three plans that all respect the group's limits.</p>
       <button class="primary" id="heroGo">Add travelers</button>
-      <svg viewBox="0 0 640 210" role="img" aria-label="Three travelers' preferences merge into one route that ends at the Golden Gate Bridge">
+      <svg viewBox="0 0 640 210" role="img" aria-label="Three travelers' preferences merge into one route out to the destination">
         <g fill="none" stroke-linecap="round" stroke-width="2.5">
           <path d="M44 44 C170 44 210 105 340 105" stroke="#2f6f8f"/>
           <path d="M44 105 L340 105" stroke="#c98a00"/>
@@ -171,15 +171,15 @@
           <path d="M340 105 C410 105 440 148 505 148" stroke="#d2411e" stroke-width="3.5"/>
         </g>
         <g font-family="Public Sans,sans-serif" font-size="12" fill="#12303b">
-          <circle cx="44" cy="44" r="6" fill="#2f6f8f"/><text x="58" y="34">Priya: museums, no long walks</text>
-          <circle cx="44" cy="105" r="6" fill="#c98a00"/><text x="58" y="95">Sam: food, nightlife</text>
-          <circle cx="44" cy="166" r="6" fill="#8a4f7d"/><text x="58" y="156">Jordan: coffee, wakes at 10</text>
+          <circle cx="44" cy="44" r="6" fill="#2f6f8f"/><text x="58" y="34">Nehmat: museums, no long walks</text>
+          <circle cx="44" cy="105" r="6" fill="#c98a00"/><text x="58" y="95">Svara: hiking, street food</text>
+          <circle cx="44" cy="166" r="6" fill="#8a4f7d"/><text x="58" y="156">Aanchal: food, wakes at 10</text>
         </g>
         <g fill="none" stroke="#12303b" stroke-width="2">
-          <path d="M496 148 H640"/>
-          <path d="M540 148 V70 M600 148 V70" stroke-width="4"/>
-          <path d="M496 148 C516 112 530 82 540 70 C558 112 582 112 600 70 C610 82 624 112 640 148" stroke-width="1.6" stroke="#d2411e"/>
-          <path d="M552 148 V108 M564 148 V114 M576 148 V114 M588 148 V108" stroke-width="1"/>
+          <path d="M496 150 H640"/>
+          <path d="M496 150 L545 86 L575 122 L596 96 L640 150 Z" stroke-width="2.2" fill="#fdf6ec"/>
+          <path d="M545 86 L560 105 L552 112 L537 100 Z" fill="#d2411e" stroke="none"/>
+          <circle cx="612" cy="70" r="11" stroke="#c98a00" stroke-width="2.2"/>
         </g>
       </svg>
     </div>
@@ -251,7 +251,7 @@
 
 <script>
 /* =====================================================================
-   CONFIG + SEED DATA
+   CONFIG (form vocabulary; all trip data comes from the backend)
    ===================================================================== */
 const INTERESTS=[['food','Food'],['coffee','Coffee'],['museums','Museums'],['hiking','Hiking'],['nightlife','Nightlife'],['shopping','Shopping'],['views','Views'],['relax','Relax']];
 const DEALBREAKERS=[['early mornings','Early mornings'],['long walks','Long walks'],['late nights','Late nights'],['expensive meals','Expensive meals']];
@@ -259,47 +259,6 @@ const DIETS=['none','vegetarian','vegan','gluten-free','halal'];
 const PACES=['relaxed','balanced','packed'];
 const PACE_N={relaxed:2,balanced:3,packed:4};
 const COLORS=['#2f6f8f','#c98a00','#4c8c5a','#8a4f7d','#b8587a'];
-const LODGING={'Mission District':{lat:37.7599,lng:-122.4148},'SoMa':{lat:37.7785,lng:-122.4056},'Union Square':{lat:37.7880,lng:-122.4075}};
-
-// 29 seeded SF places. open/close are "HH:MM" (close can pass midnight, e.g. 26:00).
-const PLACES=[
- ['tartine','Tartine Bakery','Mission',37.7614,-122.4241,['food','coffee'],12,45,'08:00','17:00',null,1,0],
- ['coffeehv','Coffee in Hayes Valley','Hayes Valley',37.7763,-122.4242,['coffee'],6,40,'07:00','18:00',null,1,0],
- ['dolores','Dolores Park','Mission',37.7596,-122.4269,['relax','views'],0,75,'06:00','22:00',null,1,0],
- ['ggb','Golden Gate Bridge walk','Presidio',37.8078,-122.4750,['hiking','views'],0,120,'06:00','21:00',null,1,1],
- ['landsend','Lands End Trail','Outer Richmond',37.7849,-122.5058,['hiking','views'],0,120,'07:00','20:00',null,1,1],
- ['sfmoma','SFMOMA','SoMa',37.7857,-122.4011,['museums'],25,120,'10:00','17:00',null,1,0],
- ['calacad','California Academy of Sciences','Golden Gate Park',37.7699,-122.4661,['museums'],40,150,'09:30','17:00',null,1,0],
- ['deyoung','de Young Museum','Golden Gate Park',37.7715,-122.4687,['museums','views'],15,100,'09:30','17:15',null,1,0],
- ['explo','Exploratorium','Embarcadero',37.8010,-122.3987,['museums'],35,150,'10:00','17:00',null,1,0],
- ['citylights','City Lights Booksellers','North Beach',37.7976,-122.4065,['shopping'],0,45,'10:00','24:00',null,1,0],
- ['chinatown','Chinatown Dragon Gate stroll','Chinatown',37.7908,-122.4058,['food','shopping'],10,75,'09:00','20:00',null,1,0],
- ['ferry','Ferry Building Marketplace','Embarcadero',37.7955,-122.3937,['food','coffee','shopping'],20,75,'10:00','19:00',null,1,0],
- ['hayesshop','Hayes Valley boutiques','Hayes Valley',37.7765,-122.4240,['shopping'],30,90,'11:00','19:00',null,1,0],
- ['twinpeaks','Twin Peaks sunset','Twin Peaks',37.7544,-122.4477,['views'],0,60,'16:00','22:00',null,1,0],
- ['spa','Japantown bathhouse & spa','Japantown',37.7855,-122.4296,['relax'],50,120,'10:00','21:00',null,1,0],
- ['jazz','Live jazz in the Fillmore','Fillmore',37.7840,-122.4330,['nightlife'],30,120,'19:00','24:00',null,1,0],
- ['nbbars','Cocktails in North Beach','North Beach',37.8003,-122.4100,['nightlife'],35,120,'17:00','26:00',null,1,0],
- ['burrito','Burrito lunch in the Mission','Mission',37.7507,-122.4181,['food'],14,50,'11:00','21:00','lunch',1,0],
- ['dimsum','Dim sum lunch in Chinatown','Chinatown',37.7941,-122.4078,['food'],22,70,'10:00','15:00','lunch',0,0],
- ['deli','Deli counter lunch in SoMa','SoMa',37.7822,-122.4000,['food'],11,40,'10:30','15:00','lunch',1,0],
- ['ramen','Ramen dinner in Japantown','Japantown',37.7850,-122.4300,['food'],22,70,'17:00','22:00','dinner',0,0],
- ['vegdin','Vegetarian dinner in Hayes Valley','Hayes Valley',37.7770,-122.4250,['food'],38,90,'17:30','22:00','dinner',1,0],
- ['tasting','Tasting-menu dinner in SoMa','SoMa',37.7810,-122.4010,['food'],90,120,'17:30','22:30','dinner',0,0],
- ['pupusa','Pupusa dinner in the Mission','Mission',37.7600,-122.4190,['food'],16,60,'17:00','22:00','dinner',1,0],
- ['pizza','Pizza dinner in North Beach','North Beach',37.8000,-122.4085,['food'],28,80,'17:00','23:00','dinner',1,0],
- ['soupsand','Soup & sandwich lunch in Hayes Valley','Hayes Valley',37.7768,-122.4235,['food'],13,45,'11:00','16:00','lunch',1,0],
- ['noodle','Noodle lunch in Japantown','Japantown',37.7852,-122.4290,['food'],15,55,'11:00','15:30','lunch',1,0],
- ['med','Mediterranean dinner in the Mission','Mission',37.7590,-122.4210,['food'],30,80,'17:00','22:30','dinner',1,0],
- ['thai','Thai dinner in the Richmond','Outer Richmond',37.7800,-122.4660,['food'],24,70,'17:00','22:00','dinner',1,0]
-].map(a=>({id:a[0],name:a[1],area:a[2],lat:a[3],lng:a[4],tags:a[5],cost:a[6],dur:a[7],open:toMin(a[8]),close:toMin(a[9]),meal:a[10],veg:!!a[11],walk:!!a[12]}));
-
-// Mock "Mem0" seed: returning travelers the demo recognizes.
-const SEED={users:{
-  priya:{name:'Priya',fields:{wake_time:'09:30',rest_windows:['14:00-15:00'],diet:['vegetarian'],budget_per_day:120,pace:'relaxed',interests:['museums','coffee','hiking'],dealbreakers:['early mornings','long walks']},facts:['Hated the 40-minute walk on the last trip','Sleeps in on day 2']},
-  sam:{name:'Sam',fields:{wake_time:'08:00',rest_windows:[],diet:[],budget_per_day:150,pace:'balanced',interests:['food','nightlife','views'],dealbreakers:[]},facts:['Gave up his dinner pick on Day 1 of the last trip (compromised)']}
-},groups:{}};
-
 /* =====================================================================
    HELPERS
    ===================================================================== */
@@ -359,9 +318,18 @@ async function mem0AddGroup(code,text,mode){
 /* =====================================================================
    STATE
    ===================================================================== */
-const room={code:Math.random().toString(36).slice(2,7).toUpperCase()};
+const room={code:(new URLSearchParams(location.search).get('room')||Math.random().toString(36).slice(2,7)).toUpperCase()};
 let DESTS=[], destLabel='';
 const destKey=()=>($('#dest')&&$('#dest').value)||(DESTS[0]&&DESTS[0].name)||'';
+async function showKnown(){
+  const el=$('#knownnames'); if(!el) return;
+  try{
+    const known=(await api('/api/personas')||[]).filter(p=>p.known).map(p=>p.name);
+    el.innerHTML=known.length
+      ? 'Already remembered: '+known.map(nm=>`<button class="linkbtn" data-q="${esc(nm)}">${esc(nm)}</button>`).join(' ')
+      : 'Nobody is remembered yet, so this first trip starts from scratch.';
+  }catch(e){}
+}
 async function loadDests(){
   DESTS=await api('/api/destinations')||[];
   $('#dest').innerHTML=DESTS.map(d=>`<option value="${esc(d.name)}">${esc(d.label)}</option>`).join('');
@@ -441,9 +409,9 @@ function renderGroup(){
 }
 function renderAdd(){
   const el=$('#addbox');
-  if(addState==='idle'){ el.innerHTML=`<div class="actions" style="margin-bottom:6px"><button class="secondary" data-a="start">+ Add traveler</button><button class="linkbtn" data-a="demo">Load demo room (Priya + Sam)</button></div>`; return; }
-  if(addState==='name'){ el.innerHTML=`<div class="card"><label>Traveler name</label><div class="row" style="flex-wrap:nowrap"><input id="nm" placeholder="e.g. Priya"><button class="primary sm" data-a="lookup">Continue</button><button class="secondary sm" data-a="cancel">Cancel</button></div>
-      <p class="hint">Returning traveler? We fill in what we remember. Try <button class="linkbtn" data-q="Priya">Priya</button> <button class="linkbtn" data-q="Sam">Sam</button> or <button class="linkbtn" data-q="Jordan">Jordan</button> (new).</p></div>`; setTimeout(()=>{const n=$('#nm'); if(n) n.focus();},0); return; }
+  if(addState==='idle'){ el.innerHTML=`<div class="actions" style="margin-bottom:6px"><button class="secondary" data-a="start">+ Add traveler</button></div>`; return; }
+  if(addState==='name'){ el.innerHTML=`<div class="card"><label>Traveler name</label><div class="row" style="flex-wrap:nowrap"><input id="nm" placeholder="e.g. Nehmat"><button class="primary sm" data-a="lookup">Continue</button><button class="secondary sm" data-a="cancel">Cancel</button></div>
+      <p class="hint">Returning traveler? We fill in what this destination remembers, and carry the rest over from their last trip. <span id="knownnames"></span></p></div>`; setTimeout(()=>{const n=$('#nm'); if(n) n.focus(); showKnown();},0); return; }
   if(addState==='recalling'){ el.innerHTML=`<div class="card"><span class="inline-spin"></span> Checking memory for ${esc(draft.name)}…</div>`; return; }
   const d=draft, b=k=>d.fromMem.includes(k)?`<span class="badge" data-badge="${k}">remembered</span>`:'';
   const chips=(key,list,cls)=>list.map(([k,l])=>`<span class="chip ${cls||''} ${d[key].includes(k)?'on':''}" data-v="${k}">${l}</span>`).join('');
@@ -461,7 +429,7 @@ function renderAdd(){
     <label style="margin-top:12px">Interests ${b('interests')}</label><div class="chips" data-chips="interests">${chips('interests',INTERESTS)}</div>
     <label style="margin-top:12px">Dealbreakers ${b('dealbreakers')}</label><div class="chips" data-chips="dealbreakers">${chips('dealbreakers',DEALBREAKERS,'avoid')}</div>
   </div>
-  <div class="navrow"><button class="secondary" data-a="cancel">Cancel</button><div>${!d.returning?'<button class="linkbtn" data-a="autofill">Autofill demo details</button> ':''}<button class="primary" data-a="save">Add to trip</button></div></div>`;
+  <div class="navrow"><button class="secondary" data-a="cancel">Cancel</button><div>${!d.returning?'<button class="linkbtn" data-a="autofill">Fill a starting point</button> ':''}<button class="primary" data-a="save">Add to trip</button></div></div>`;
 }
 function renderAll(){
   renderMembers(); renderGroup(); renderAdd();
@@ -487,9 +455,8 @@ $('#addbox').addEventListener('click',e=>{
   const act=a.dataset.a;
   if(act==='start'){ addState='name'; renderAdd(); }
   else if(act==='cancel'){ addState='idle'; draft=null; renderAdd(); }
-  else if(act==='demo') loadDemo();
   else if(act==='lookup') lookup();
-  else if(act==='autofill'){ Object.assign(draft,{wake_time:'10:00',rest_windows:[],diet:[],budget_per_day:90,pace:'balanced',interests:['coffee','shopping','relax'],dealbreakers:['early mornings']}); renderAdd(); }
+  else if(act==='autofill'){ Object.assign(draft,{wake_time:'09:00',rest_windows:[],diet:[],budget_per_day:120,pace:'balanced',interests:['food','views'],dealbreakers:[]}); renderAdd(); }
   else if(act==='save') saveDraft();
 });
 async function lookup(){
@@ -505,21 +472,11 @@ async function saveDraft(){
   const m=clone(draft); members.push(m); mem0SaveProfile(m);
   addState='idle'; draft=null; renderAll();
 }
-async function loadDemo(){
-  const known=(await api('/api/personas')||[]).filter(p=>p.known).map(p=>p.name);
-  if(!known.length){ toast('No returning travelers yet. Add someone, plan a trip, and they will be remembered.'); return; }
-  for(const n of known){
-    if(members.some(m=>m.name===n)) continue;
-    const rec=await mem0Recall(n); if(!rec||!rec.fields) continue;
-    members.push({...blankDraft(rec.name),...clone(rec.fields),returning:true,fromMem:Object.keys(rec.fields)});
-  }
-  renderAll(); toast('Loaded '+names(known)+' from memory. Add someone new next.');
-}
 $('#members').addEventListener('click',e=>{ const d=e.target.closest('[data-del]'); if(d){ members.splice(+d.dataset.del,1); renderAll(); } });
-$('#copy').onclick=async()=>{ const url=`https://grouptrip.demo/r/${room.code}`; try{await navigator.clipboard.writeText(url);}catch(e){} toast('Invite link copied (demo link, not live yet)'); };
+$('#copy').onclick=async()=>{ const url=`${location.origin}/?room=${room.code}`; try{await navigator.clipboard.writeText(url);}catch(e){} toast('Room link copied: '+url); };
 
 /* =====================================================================
-   PLANNER SEAM. Swap planTrip() for the real backend call.
+   PLANNER. Calls POST /api/plan.
    Request  : {room:{code,destination,days,start_date,lodging}, members:[{name,wake_time,rest_windows,diet,budget_per_day,pace,interests,dealbreakers}]}
    Response : {priority:string|null, plans:[{key:'fastest'|'max'|'cheapest', label, note,
                 days:[{label, stops:[{name,area,kind:'meal'|'activity',start,end,cost,travel_min,travel_how,matches:[name],why,tag}]}],
@@ -530,93 +487,6 @@ async function planTrip(payload){ return jpost('/api/plan',payload); }
 function buildPayload(){
   return {room:{code:room.code,destination:destKey(),days:+$('#days').value,start_date:$('#start').value||null,lodging:$('#lodging').value},
           members:members.map(({name,wake_time,rest_windows,diet,budget_per_day,pace,interests,dealbreakers})=>clone({name,wake_time,rest_windows,diet,budget_per_day,pace,interests,dealbreakers}))};
-}
-
-/* ---------- MOCK OPTIMIZER (greedy insertion, 3 weight vectors) ---------- */
-function hav(a,b){const R=6371,r=x=>x*Math.PI/180,dl=r(b.lat-a.lat),dg=r(b.lng-a.lng);const h=Math.sin(dl/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
-function travel(a,b){const km=hav(a,b)*1.3; return km<1?{min:Math.max(2,Math.round(km/4.8*60)),how:'walk'}:{min:Math.round(10+km/18*60),how:'transit'};}
-const WEIGHTS={fastest:{fit:1,dwell:.3,travel:5,cost:.3},max:{fit:1.2,dwell:2.5,travel:.4,cost:.1},cheapest:{fit:.8,dwell:.5,travel:1,cost:6}};
-const LABELS={fastest:'Fastest',max:'Max Experience',cheapest:'Cheapest'};
-
-function mockPlan({room:R,members:M}){
-  const g=groupProfile(M), lodge=LODGING[R.lodging]||LODGING['Mission District'], nm=M.length;
-  const has=(db)=>M.some(m=>m.dealbreakers.includes(db));
-  const mealVeg=M.some(m=>m.diet.some(d=>/veg/.test(d)));
-  const dayEnd=has('late nights')?1260:(M.some(m=>m.interests.includes('nightlife'))?1440:1320);
-  const rests=g.rests.map(w=>w.split('-').map(toMin));
-  // fairness: someone who compromised on a PAST trip gets the dinner pick
-  const priority=M.find(m=>memFacts(m.name).some(f=>/gave up|compromis/i.test(f)&&!f.includes(R.code)));
-  const ok=p=>{
-    if(mealVeg&&p.meal&&!p.veg) return false;
-    if(has('long walks')&&p.walk) return false;
-    if(has('expensive meals')&&p.meal&&p.cost>35) return false;
-    if(has('late nights')&&p.open>=1080&&!p.meal) return false;
-    return true;
-  };
-  const walkN=M.reduce((n,m)=>n+memFacts(m.name).filter(f=>/walk/i.test(f)).length,0), tMult=1+0.5*Math.min(walkN,4);
-  function build(key){
-    const W=WEIGHTS[key], used=new Set(), cnt={}; M.forEach(m=>cnt[m.name]=0);
-    const days=[]; let trT=0,dwT=0,costT=0,total=0;
-    for(let d=0;d<R.days;d++){
-      const stops=[]; let t=g.dayStartMin,loc=lodge,spent=0,nAct=0,hasL=false,hasD=false;
-      for(let guard=0;guard<14;guard++){
-        const capped=nAct>=g.maxAct+(key==='max'?1:0);
-        if(capped&&hasL&&hasD) break;
-        let need=null;
-        if(!hasL&&(t>=720||capped)) need='lunch';
-        else if(!hasD&&(t>=1110||(capped&&hasL))) need='dinner';
-        let best=null;
-        const minCnt=Math.min(...M.map(m=>cnt[m.name]));
-        for(const p of PLACES){
-          if(used.has(p.id)||!ok(p)) continue;
-          if(need?p.meal!==need:(p.meal||capped)) continue;
-          const leg=travel(loc,p), arrive=t+leg.min;
-          let start=Math.max(arrive,p.open,need==='lunch'?690:need==='dinner'?1080:0);
-          if(start-arrive>(need?210:45)) continue;
-          for(const [rs,re] of rests) if(start<re&&start+p.dur>rs) start=Math.max(start,re); // rest window = a break, not "waiting"
-          const end=start+p.dur;
-          if(end>Math.min(p.close,dayEnd+(need==='dinner'?60:0))) continue;
-          if(spent+p.cost>g.cap) continue;
-          let num=0,den=0; const match=[];
-          for(const m of M){
-            const hit=m.interests.some(i=>p.tags.includes(i));
-            let w=1+(cnt[m.name]===minCnt?.8:0);            // least-misery boost
-            if(need==='dinner'&&priority&&m===priority) w+=2; // fairness boost
-            den+=w; if(hit){num+=w;match.push(m.name);}
-          }
-          if(!need&&!match.length) continue;
-          const score=W.fit*(num/den)*40+W.dwell*p.dur/10-W.travel*tMult*leg.min/5-W.cost*p.cost/5;
-          if(!best||score>best.score) best={p,leg,start,end,score,match,need};
-        }
-        if(!best){ if(need==='lunch'){hasL=true;continue;} if(need==='dinner'){hasD=true;continue;} break; }
-        const {p,leg,start,end,match}=best;
-        used.add(p.id); spent+=p.cost; t=end; loc=p;
-        if(p.meal==='lunch') hasL=true; else if(p.meal==='dinner') hasD=true; else nAct++;
-        match.forEach(n=>cnt[n]++);
-        let why,tag=null;
-        if(p.meal){
-          why=(best.need==='dinner'&&priority?`${priority.name} gets the dinner pick (compromised on the last trip). `:'')+(mealVeg?'Vegetarian-friendly for the group.':'Fuel stop.');
-        } else {
-          why=`Picked for ${names(match)}.`+(stops.length===0?` Starts after ${fmt(g.dayStartMin)} so everyone is up.`:'');
-          if(nm>=3&&match.length<Math.ceil(nm/2)){ tag='Compromise'; why+=` Lighter fit for ${names(M.filter(m=>!match.includes(m.name)).map(m=>m.name))}.`; }
-        }
-        stops.push({lat:p.lat,lng:p.lng,name:p.name,area:p.area,kind:p.meal?'meal':'activity',start,end,cost:p.cost,travel_min:leg.min,travel_how:leg.how,matches:match,why,tag});
-        trT+=leg.min; dwT+=p.dur; total++;
-      }
-      costT+=spent; days.push({stops});
-    }
-    const sat={}; M.forEach(m=>sat[m.name]=Math.round(35+65*(cnt[m.name]/Math.max(1,total))));
-    const vals=Object.values(sat);
-    return {key,label:LABELS[key],days,sc:{travel:trT,dwell:dwT,cost:costT,sat,minSat:Math.min(...vals),meanSat:Math.round(vals.reduce((a,b)=>a+b,0)/vals.length)}};
-  }
-  const plans=['fastest','max','cheapest'].map(build);
-  const [f,m,c]=plans.map(p=>p.sc);
-  const lowest=sc=>{const e=Object.entries(sc.sat).sort((a,b)=>a[1]-b[1])[0];return ` Lowest fit: ${e[0]} (${e[1]}%).`;};
-  const dd=(a,b)=>Math.abs(a-b);
-  plans[0].note=`Least time on the road at ${f.travel} min, ${dd(c.travel,f.travel)} min ${c.travel>=f.travel?'less':'more'} than Cheapest, but costs $${dd(f.cost,c.cost)} ${f.cost>=c.cost?'more':'less'} per person.`+lowest(f);
-  plans[1].note=`Most time at the spots: ${m.dwell} min, ${dd(m.dwell,f.dwell)} min ${m.dwell>=f.dwell?'more':'less'} than Fastest, with ${m.travel} min of transit.`+lowest(m);
-  plans[2].note=`Lowest spend at $${c.cost} per person, $${dd(c.cost,m.cost)} ${c.cost<=m.cost?'under':'over'} Max Experience, but ${dd(c.travel,f.travel)} min ${c.travel>=f.travel?'more':'less'} transit than Fastest.`+lowest(c);
-  return {priority:priority?priority.name:null,plans};
 }
 
 /* =====================================================================
