@@ -22,7 +22,11 @@ def _ask(system: str, user: str, max_tokens: int = 1200) -> str | None:
         return None
     try:
         import anthropic
-        msg = anthropic.Anthropic().messages.create(
+        # A user-scoped key (sk-ant-usr-...) is rejected with 400 unless the workspace is named in a
+        # header; a workspace-scoped key (sk-ant-api03-...) needs nothing extra.
+        ws = os.getenv("ANTHROPIC_WORKSPACE_ID")
+        client = anthropic.Anthropic(default_headers={"anthropic-workspace-id": ws} if ws else None)
+        msg = client.messages.create(
             model=MODEL, max_tokens=max_tokens, system=system, messages=[{"role": "user", "content": user}])
         LAST_ERROR = None
         return msg.content[0].text

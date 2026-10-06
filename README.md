@@ -64,6 +64,10 @@ explain.explain_replan(result["itineraries"]["cheapest"], result2["itineraries"]
 - `personas.json` is sample starter data; `python seed_memory.py --reset` loads an optional fictional history for dry runs. Neither is required - memory fills up from real use.
 - New destination = drop a JSON in `destinations/` (see `yellowstone.json`). New persona = add to `personas.json`.
 - `.env`: `ANTHROPIC_API_KEY`, `MEM0_API_KEY`. Both optional; without them the app falls back to local memory and templated explanations.
+- Use a **workspace-scoped** Anthropic key (`sk-ant-api03-...`). A user-scoped key (`sk-ant-usr-...`) is
+  rejected with HTTP 400 unless you also set `ANTHROPIC_WORKSPACE_ID`, which the app will send as the
+  `anthropic-workspace-id` header. `GET /api/llm-check` makes one tiny call and reports the real error,
+  because explanations fall back to templates silently.
 - Mem0 2.x needs identity inside `filters={"user_id": ...}`, not as a top-level kwarg. `memory.py` handles that.
 
 ## HTTP API (`server.py`)
