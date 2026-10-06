@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GroupTrip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --fog:#eceff0; --paper:#fbfbf9; --line:#d5dcdd; --ink:#12303b; --muted:#5d7079;
+    --bridge:#d2411e; --bridge-ink:#a8310f; --good:#2d7a4f;
+    --display:'Bricolage Grotesque','Avenir Next','Helvetica Neue',Arial,sans-serif;
+    --body:'Public Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--body);background:var(--fog);color:var(--ink);line-height:1.5;font-size:15px}
+  :focus-visible{outline:2px solid var(--bridge);outline-offset:2px}
+  .wrap{max-width:1040px;margin:0 auto;padding:20px 20px 80px}
+  h1,h2,h3{font-family:var(--display);letter-spacing:-.02em;margin:0}
+  h2{font-size:20px;font-weight:700;margin-bottom:12px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:26px}
+  .logo{font-family:var(--display);font-weight:700;font-size:21px;letter-spacing:-.03em}
+  .bnav{display:flex;gap:20px}
+  .bnav button{border:none;background:none;padding:6px 0;font:inherit;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}
+  .bnav button.on{color:var(--ink);border-color:var(--bridge)}
+  .hdr-right{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--muted)}
+  .roomchip{font-weight:600;color:var(--ink)}
+  .hidden{display:none!important}
+  .hint{color:var(--muted);font-size:13px;margin:6px 0 0}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .field{flex:1;min-width:140px}
+  label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:5px}
+  input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:6px;font:inherit;background:var(--paper);color:var(--ink)}
+  input:disabled{color:var(--muted);background:var(--fog)}
+  button.primary{background:var(--bridge);color:#fff;border:none;border-radius:8px;padding:12px 22px;font:inherit;font-weight:600;cursor:pointer}
+  button.primary:hover{background:var(--bridge-ink)}
+  button.secondary{background:var(--paper);color:var(--ink);border:1px solid var(--ink);border-radius:8px;padding:12px 20px;font:inherit;font-weight:600;cursor:pointer}
+  button.secondary:hover{background:var(--ink);color:#fff}
+  button.sm{padding:9px 14px;font-size:14px}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .linkbtn{background:none;border:none;color:var(--bridge-ink);text-decoration:underline;cursor:pointer;font:inherit;padding:4px}
+  .actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .navrow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:12px}
+  .grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:28px;align-items:start}
+  @media(max-width:780px){.grid2{grid-template-columns:1fr}}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 12px;font-size:13px;cursor:pointer;user-select:none}
+  .chip:hover{border-color:var(--ink)}
+  .chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .chip.avoid.on{background:var(--paper);color:var(--bridge-ink);border-color:var(--bridge);text-decoration:line-through}
+  .chip.static{cursor:default;padding:2px 9px;font-size:12px;background:transparent}
+  .chip.static:hover{border-color:var(--line)}
+  .chip.static.shared{background:var(--good);color:#fff;border-color:var(--good)}
+  .chip.static.avoidc{color:var(--bridge-ink);border-color:#efc4b8}
+  .badge{font-size:11.5px;font-weight:500;color:#2f6f8f;margin-left:8px;font-style:italic;text-transform:none;letter-spacing:0}
+  .avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;font-family:var(--display);font-weight:700;font-size:13px;flex:none}
+  .x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;line-height:1;align-self:flex-start}
+  .tcard-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+
+  /* hero: preferences converging into one route */
+  .hero{padding:6px 0 22px;margin-bottom:26px;border-bottom:1px solid var(--line)}
+  .hero h1{font-size:clamp(30px,5.2vw,50px);line-height:1.04;font-weight:700;max-width:16em}
+  .hero p{color:var(--muted);max-width:34em;margin:12px 0 16px}
+  .hero svg{display:block;width:100%;height:auto;max-height:230px;margin-top:22px}
+
+  /* members + group */
+  .member{display:flex;gap:12px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+  .member .info{flex:1;min-width:0}
+  .member .info b{font-family:var(--display);font-size:16px}
+  .member .line{font-size:13px;color:var(--muted);margin:2px 0 8px}
+  .empty{border:1px dashed #b4c0c2;border-radius:10px;padding:22px;color:var(--muted);margin-bottom:12px}
+  .gp-row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .gp-row span:first-child{color:var(--muted)}
+  .gp-row span:last-child{text-align:right;font-weight:600}
+  .gp-sub{font-size:13px;color:var(--muted);margin:12px 0 6px}
+  .flag{border-left:3px solid var(--bridge);padding:4px 0 4px 10px;margin-top:12px;font-size:13.5px}
+  .flag.info{border-color:#2f6f8f}
+  .flag b{font-weight:600}
+
+  /* loading */
+  .loading{text-align:center;padding:90px 0}
+  .spinner,.inline-spin{border:3px solid var(--line);border-top-color:var(--bridge);border-radius:50%;animation:spin .9s linear infinite}
+  .spinner{width:34px;height:34px;margin:0 auto 16px}
+  .inline-spin{width:14px;height:14px;display:inline-block;vertical-align:-2px;margin-right:6px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media(prefers-reduced-motion:reduce){.spinner,.inline-spin{animation-duration:3s}}
+  .loadmsg{color:var(--muted);min-height:22px}
+
+  /* plans */
+  .sub{color:var(--muted);margin:6px 0 20px}
+  .plans{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:14px;padding:2px 2px 14px}
+  .plan{flex:0 0 min(310px,86%);scroll-snap-align:start;background:var(--paper);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer}
+  .plan.sel{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+  @media(min-width:980px){.plans{display:grid;grid-template-columns:repeat(3,1fr);overflow:visible}.plan{flex:none}}
+  .route{background:#e3e9e8;border-bottom:1px solid var(--line)}
+  .route svg{display:block;width:100%;height:150px}
+  .pbody{padding:14px 16px 16px}
+  .ptop{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .ptop h3{font-size:20px;font-weight:700}
+  .picktag{font-size:12px;font-weight:600;color:var(--good)}
+  .big{font-family:var(--display);font-weight:700;font-size:38px;letter-spacing:-.03em;line-height:1.1;margin:6px 0 2px}
+  .big small{font-family:var(--body);font-weight:400;font-size:13px;color:var(--muted);letter-spacing:0;margin-left:6px}
+  .big.best{color:var(--good)}
+  .pnote{font-size:13px;color:var(--muted);margin:6px 0 10px;min-height:60px}
+  .metric{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;border-top:1px solid var(--line)}
+  .metric span:last-child{font-weight:600}
+  .metric.best span:last-child{color:var(--good)}
+  .metric.best span:last-child:after{content:" best";font-weight:400;font-size:11.5px}
+  .sats{margin:12px 0 14px}
+  .sat{display:flex;align-items:center;gap:8px;font-size:12.5px;margin-bottom:6px}
+  .sat .avatar{width:20px;height:20px;font-size:10px}
+  .satbar{flex:1;height:5px;background:#e3e9e8;border-radius:3px;overflow:hidden}
+  .satbar i{display:block;height:100%}
+  .sat b{width:36px;text-align:right;font-weight:500}
+  .sat b.low{font-weight:700;color:var(--bridge-ink)}
+  .pickbtn{width:100%}
+  .pickbtn.on{background:var(--good);border-color:var(--good);color:#fff}
+  .tabs{display:flex;gap:6px;margin:10px 0 18px;overflow-x:auto}
+  .tab{padding:7px 16px;border-radius:999px;border:1px solid var(--line);background:var(--paper);cursor:pointer;white-space:nowrap;font-weight:500;font-size:14px}
+  .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .agent{border-left:3px solid var(--good);border-radius:0 10px 10px 0}
+  .agent ul{margin:6px 0 0;padding-left:18px;font-size:14px}
+
+  /* timeline: each stop carries a bar showing whose pick it is */
+  .stop{display:grid;grid-template-columns:76px 6px 1fr;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+  .stop:last-child{border-bottom:none}
+  .st{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.02em;line-height:1.1;text-align:right}
+  .st span{display:block;font-family:var(--body);font-weight:400;font-size:12px;color:var(--muted);letter-spacing:0}
+  .bar{display:flex;flex-direction:column;gap:2px;border-radius:3px;overflow:hidden}
+  .bar i{flex:1;display:block}
+  .sb h3{font-size:18px;font-weight:700}
+  .sm{font-size:13px;color:var(--muted);margin:2px 0 6px}
+  .sw{font-size:14px}
+  .tag{font-size:12px;font-weight:600;color:var(--bridge-ink);margin-left:6px}
+  .stop.meal .sb h3{font-weight:500}
+  details{margin-top:14px;font-size:14px}
+  details summary{cursor:pointer;font-weight:600}
+  .mem{font-size:13px;margin:6px 0}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;font-size:14px;z-index:9}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">GroupTrip</div>
+    <nav class="bnav">
+      <button data-nav="room" class="on">Room</button>
+      <button data-nav="plans">Plans</button>
+      <button data-nav="feedback">Feedback</button>
+    </nav>
+    <div class="hdr-right">
+      <span class="roomchip" id="roomchip"></span>
+      <button class="linkbtn" id="copy">Copy invite link</button>
+    </div>
+  </header>
+
+  <!-- ROOM -->
+  <section id="view-room">
+    <div class="hero">
+      <h1>Everyone's list goes in. One route comes out.</h1>
+      <p>Add each traveler's preferences, see where they clash, and compare three plans that all respect the group's limits.</p>
+      <button class="primary" id="heroGo">Add travelers</button>
+      <svg viewBox="0 0 640 210" role="img" aria-label="Three travelers' preferences merge into one route that ends at the Golden Gate Bridge">
+        <g fill="none" stroke-linecap="round" stroke-width="2.5">
+          <path d="M44 44 C170 44 210 105 340 105" stroke="#2f6f8f"/>
+          <path d="M44 105 L340 105" stroke="#c98a00"/>
+          <path d="M44 166 C170 166 210 105 340 105" stroke="#8a4f7d"/>
+          <path d="M340 105 C410 105 440 148 505 148" stroke="#d2411e" stroke-width="3.5"/>
+        </g>
+        <g font-family="Public Sans,sans-serif" font-size="12" fill="#12303b">
+          <circle cx="44" cy="44" r="6" fill="#2f6f8f"/><text x="58" y="34">Priya: museums, no long walks</text>
+          <circle cx="44" cy="105" r="6" fill="#c98a00"/><text x="58" y="95">Sam: food, nightlife</text>
+          <circle cx="44" cy="166" r="6" fill="#8a4f7d"/><text x="58" y="156">Jordan: coffee, wakes at 10</text>
+        </g>
+        <g fill="none" stroke="#12303b" stroke-width="2">
+          <path d="M496 148 H640"/>
+          <path d="M540 148 V70 M600 148 V70" stroke-width="4"/>
+          <path d="M496 148 C516 112 530 82 540 70 C558 112 582 112 600 70 C610 82 624 112 640 148" stroke-width="1.6" stroke="#d2411e"/>
+          <path d="M552 148 V108 M564 148 V114 M576 148 V114 M588 148 V108" stroke-width="1"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div class="field"><label>Destination</label><input value="San Francisco" disabled title="Demo data is seeded for SF"></div>
+        <div class="field"><label>Days</label>
+          <select id="days"><option>1</option><option selected>2</option><option>3</option></select></div>
+        <div class="field"><label>Start date</label><input id="start" type="date"></div>
+        <div class="field"><label>Staying in</label>
+          <select id="lodging"><option>Mission District</option><option>SoMa</option><option>Union Square</option></select></div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <h2>Who's going <span class="hint" id="count"></span></h2>
+        <div id="members"></div>
+        <div id="addbox"></div>
+      </div>
+      <aside>
+        <h2>What the group needs</h2>
+        <div class="card" id="gprofile"></div>
+      </aside>
+    </div>
+
+    <div class="actions" style="margin-top:8px">
+      <button class="primary" id="plan">Plan the trip</button>
+      <span class="hint" id="planhint"></span>
+    </div>
+  </section>
+
+  <!-- LOADING -->
+  <section id="view-loading" class="hidden">
+    <div class="loading"><div class="spinner"></div><div class="loadmsg" id="loadmsg"></div></div>
+  </section>
+
+  <!-- PLANS -->
+  <section id="view-plans" class="hidden">
+    <div class="actions" style="margin-bottom:10px"><button class="linkbtn" id="back">Back to the room</button></div>
+    <h1 id="ptitle"></h1>
+    <p class="sub" id="psub"></p>
+    <div id="agentnotes"></div>
+    <div class="plans" id="plans"></div>
+    <h2 id="tltitle"></h2>
+    <div class="tabs" id="tabs"></div>
+    <div class="timeline" id="timeline"></div>
+
+    <div class="card" id="fbcard" style="margin-top:20px">
+      <h2>What's off about this plan?</h2>
+      <div class="row">
+        <div class="field" style="max-width:180px"><label>Who's talking</label><select id="fbwho"></select></div>
+        <div class="field" style="flex:3"><label>Feedback</label><input id="fbtext" placeholder="e.g. too much walking on this plan"></div>
+      </div>
+      <div class="chips" style="margin:10px 0">
+        <span class="chip" data-fb="Too much walking">Too much walking</span>
+        <span class="chip" data-fb="Too early in the morning">Too early</span>
+        <span class="chip" data-fb="Too expensive">Too expensive</span>
+        <span class="chip" data-fb="Too packed and tiring">Too packed</span>
+      </div>
+      <button class="primary sm" id="replan">Re-plan</button>
+      <details><summary>What the agent remembers</summary><div id="memlist"></div></details>
+    </div>
+  </section>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+/* =====================================================================
+   CONFIG + SEED DATA
+   ===================================================================== */
+const INTERESTS=[['food','Food'],['coffee','Coffee'],['museums','Museums'],['hiking','Hiking'],['nightlife','Nightlife'],['shopping','Shopping'],['views','Views'],['relax','Relax']];
+const DEALBREAKERS=[['early mornings','Early mornings'],['long walks','Long walks'],['late nights','Late nights'],['expensive meals','Expensive meals']];
+const DIETS=['none','vegetarian','vegan','gluten-free','halal'];
+const PACES=['relaxed','balanced','packed'];
+const PACE_N={relaxed:2,balanced:3,packed:4};
+const COLORS=['#2f6f8f','#c98a00','#4c8c5a','#8a4f7d','#b8587a'];
+const LODGING={'Mission District':{lat:37.7599,lng:-122.4148},'SoMa':{lat:37.7785,lng:-122.4056},'Union Square':{lat:37.7880,lng:-122.4075}};
+
+// 29 seeded SF places. open/close are "HH:MM" (close can pass midnight, e.g. 26:00).
+const PLACES=[
+ ['tartine','Tartine Bakery','Mission',37.7614,-122.4241,['food','coffee'],12,45,'08:00','17:00',null,1,0],
+ ['coffeehv','Coffee in Hayes Valley','Hayes Valley',37.7763,-122.4242,['coffee'],6,40,'07:00','18:00',null,1,0],
+ ['dolores','Dolores Park','Mission',37.7596,-122.4269,['relax','views'],0,75,'06:00','22:00',null,1,0],
+ ['ggb','Golden Gate Bridge walk','Presidio',37.8078,-122.4750,['hiking','views'],0,120,'06:00','21:00',null,1,1],
+ ['landsend','Lands End Trail','Outer Richmond',37.7849,-122.5058,['hiking','views'],0,120,'07:00','20:00',null,1,1],
+ ['sfmoma','SFMOMA','SoMa',37.7857,-122.4011,['museums'],25,120,'10:00','17:00',null,1,0],
+ ['calacad','California Academy of Sciences','Golden Gate Park',37.7699,-122.4661,['museums'],40,150,'09:30','17:00',null,1,0],
+ ['deyoung','de Young Museum','Golden Gate Park',37.7715,-122.4687,['museums','views'],15,100,'09:30','17:15',null,1,0],
+ ['explo','Exploratorium','Embarcadero',37.8010,-122.3987,['museums'],35,150,'10:00','17:00',null,1,0],
+ ['citylights','City Lights Booksellers','North Beach',37.7976,-122.4065,['shopping'],0,45,'10:00','24:00',null,1,0],
+ ['chinatown','Chinatown Dragon Gate stroll','Chinatown',37.7908,-122.4058,['food','shopping'],10,75,'09:00','20:00',null,1,0],
+ ['ferry','Ferry Building Marketplace','Embarcadero',37.7955,-122.3937,['food','coffee','shopping'],20,75,'10:00','19:00',null,1,0],
+ ['hayesshop','Hayes Valley boutiques','Hayes Valley',37.7765,-122.4240,['shopping'],30,90,'11:00','19:00',null,1,0],
+ ['twinpeaks','Twin Peaks sunset','Twin Peaks',37.7544,-122.4477,['views'],0,60,'16:00','22:00',null,1,0],
+ ['spa','Japantown bathhouse & spa','Japantown',37.7855,-122.4296,['relax'],50,120,'10:00','21:00',null,1,0],
+ ['jazz','Live jazz in the Fillmore','Fillmore',37.7840,-122.4330,['nightlife'],30,120,'19:00','24:00',null,1,0],
+ ['nbbars','Cocktails in North Beach','North Beach',37.8003,-122.4100,['nightlife'],35,120,'17:00','26:00',null,1,0],
+ ['burrito','Burrito lunch in the Mission','Mission',37.7507,-122.4181,['food'],14,50,'11:00','21:00','lunch',1,0],
+ ['dimsum','Dim sum lunch in Chinatown','Chinatown',37.7941,-122.4078,['food'],22,70,'10:00','15:00','lunch',0,0],
+ ['deli','Deli counter lunch in SoMa','SoMa',37.7822,-122.4000,['food'],11,40,'10:30','15:00','lunch',1,0],
+ ['ramen','Ramen dinner in Japantown','Japantown',37.7850,-122.4300,['food'],22,70,'17:00','22:00','dinner',0,0],
+ ['vegdin','Vegetarian dinner in Hayes Valley','Hayes Valley',37.7770,-122.4250,['food'],38,90,'17:30','22:00','dinner',1,0],
+ ['tasting','Tasting-menu dinner in SoMa','SoMa',37.7810,-122.4010,['food'],90,120,'17:30','22:30','dinner',0,0],
+ ['pupusa','Pupusa dinner in the Mission','Mission',37.7600,-122.4190,['food'],16,60,'17:00','22:00','dinner',1,0],
+ ['pizza','Pizza dinner in North Beach','North Beach',37.8000,-122.4085,['food'],28,80,'17:00','23:00','dinner',1,0],
+ ['soupsand','Soup & sandwich lunch in Hayes Valley','Hayes Valley',37.7768,-122.4235,['food'],13,45,'11:00','16:00','lunch',1,0],
+ ['noodle','Noodle lunch in Japantown','Japantown',37.7852,-122.4290,['food'],15,55,'11:00','15:30','lunch',1,0],
+ ['med','Mediterranean dinner in the Mission','Mission',37.7590,-122.4210,['food'],30,80,'17:00','22:30','dinner',1,0],
+ ['thai','Thai dinner in the Richmond','Outer Richmond',37.7800,-122.4660,['food'],24,70,'17:00','22:00','dinner',1,0]
+].map(a=>({id:a[0],name:a[1],area:a[2],lat:a[3],lng:a[4],tags:a[5],cost:a[6],dur:a[7],open:toMin(a[8]),close:toMin(a[9]),meal:a[10],veg:!!a[11],walk:!!a[12]}));
+
+// Mock "Mem0" seed: returning travelers the demo recognizes.
+const SEED={users:{
+  priya:{name:'Priya',fields:{wake_time:'09:30',rest_windows:['14:00-15:00'],diet:['vegetarian'],budget_per_day:120,pace:'relaxed',interests:['museums','coffee','hiking'],dealbreakers:['early mornings','long walks']},facts:['Hated the 40-minute walk on the last trip','Sleeps in on day 2']},
+  sam:{name:'Sam',fields:{wake_time:'08:00',rest_windows:[],diet:[],budget_per_day:150,pace:'balanced',interests:['food','nightlife','views'],dealbreakers:[]},facts:['Gave up his dinner pick on Day 1 of the last trip (compromised)']}
+},groups:{}};
+
+/* =====================================================================
+   HELPERS
+   ===================================================================== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function toMin(s){const [h,m]=String(s).split(':').map(Number);return h*60+(m||0);}
+function fmt(m){m=((Math.round(m)%1440)+1440)%1440;const h=Math.floor(m/60),mm=m%60;return `${((h+11)%12)+1}:${String(mm).padStart(2,'0')} ${h<12?'AM':'PM'}`;}
+const show=id=>{['room','loading','plans'].forEach(v=>$('#view-'+v).classList.toggle('hidden',v!==id));
+  document.querySelectorAll('.bnav button').forEach(b=>b.classList.toggle('on',b.dataset.nav===id));
+  try{window.scrollTo(0,0);}catch(e){}};
+let toastT; function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.remove('hidden');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.add('hidden'),2600);}
+const names=a=>a.join(a.length>2?', ':' & ');
+const clone=o=>JSON.parse(JSON.stringify(o));
+const avIdx=name=>Math.max(0,members.findIndex(m=>m.name===name));
+const avatar=(name,sz)=>`<div class="avatar" style="background:${COLORS[avIdx(name)%5]}" title="${esc(name)}">${esc((name[0]||'?').toUpperCase())}</div>`;
+
+/* =====================================================================
+   MEMORY SEAM (mock Mem0). Replace the 3 functions below with real calls.
+   Everything else only talks to these.
+   ===================================================================== */
+let MEM=null;
+function memLoad(){ if(MEM) return MEM; try{MEM=JSON.parse(localStorage.getItem('gt_mem2')||'null');}catch(e){} if(!MEM) MEM=clone(SEED); return MEM; }
+function memSave(){ try{localStorage.setItem('gt_mem2',JSON.stringify(MEM));}catch(e){} }
+const memFacts=name=>(memLoad().users[name.toLowerCase()]||{}).facts||[];
+
+async function mem0Recall(name){
+  // REAL: const r=await fetch('/api/memory/recall?user_id='+encodeURIComponent(name)); return r.ok? r.json():null;
+  //       expected: {name, fields:{wake_time,rest_windows,diet,budget_per_day,pace,interests,dealbreakers}, facts:[string]} or null
+  await sleep(450);
+  const rec=memLoad().users[name.trim().toLowerCase()];
+  return rec?clone(rec):null;
+}
+async function mem0Add(name,text,meta){
+  // REAL: await fetch('/api/memory/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user_id:name,text,metadata:meta})});
+  const u=memLoad().users, k=name.toLowerCase();
+  if(!u[k]) u[k]={name,fields:null,facts:[]};
+  u[k].facts.push(text); memSave();
+}
+async function mem0SaveProfile(m){
+  // REAL: same endpoint as mem0Add, with the profile as natural language or structured fields.
+  const u=memLoad().users, k=m.name.toLowerCase();
+  const fields={wake_time:m.wake_time,rest_windows:m.rest_windows,diet:m.diet,budget_per_day:m.budget_per_day,pace:m.pace,interests:m.interests,dealbreakers:m.dealbreakers};
+  u[k]={name:m.name,fields:clone(fields),facts:(u[k]&&u[k].facts)||[]}; memSave();
+}
+async function mem0AddGroup(code,text){ const g=memLoad().groups; (g[code]=g[code]||[]).push(text); memSave(); }
+
+/* =====================================================================
+   STATE
+   ===================================================================== */
+const room={code:Math.random().toString(36).slice(2,7).toUpperCase()};
+let members=[], addState='idle', draft=null, result=null, selPlan='fastest', chosenPlan=null, activeDay=0, agentNotes=[];
+$('#roomchip').textContent='Room '+room.code;
+
+function blankDraft(name){return {name,wake_time:'09:00',rest_windows:[],diet:[],budget_per_day:100,pace:'balanced',interests:[],dealbreakers:[],returning:false,fromMem:[]};}
+function parseRest(s){return [...String(s).matchAll(/(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})/g)].map(m=>`${m[1]}-${m[2]}`);}
+function effWake(m){let w=toMin(m.wake_time||'09:00'); if(m.dealbreakers.includes('early mornings')) w=Math.max(w,540); return w;}
+
+/* =====================================================================
+   GROUP PROFILE (merge rules from the spec: hard = intersection/min, soft = counts)
+   ===================================================================== */
+function groupProfile(ms){
+  if(!ms.length) return null;
+  const wakes=ms.map(m=>({n:m.name,w:effWake(m)}));
+  const latest=wakes.reduce((a,b)=>b.w>a.w?b:a), earliest=wakes.reduce((a,b)=>b.w<a.w?b:a);
+  const dayStartMin=latest.w+30;
+  const cap=Math.min(...ms.map(m=>m.budget_per_day));
+  const lo=ms.reduce((a,b)=>b.budget_per_day<a.budget_per_day?b:a), hi=ms.reduce((a,b)=>b.budget_per_day>a.budget_per_day?b:a);
+  const diets=[...new Set(ms.flatMap(m=>m.diet))];
+  const ic={}; ms.forEach(m=>m.interests.forEach(i=>ic[i]=(ic[i]||0)+1));
+  const interests=Object.entries(ic).sort((a,b)=>b[1]-a[1]);
+  const avoid=[...new Set(ms.flatMap(m=>m.dealbreakers))];
+  const rests=[...new Set(ms.flatMap(m=>m.rest_windows))];
+  const maxAct=Math.round(ms.reduce((s,m)=>s+PACE_N[m.pace],0)/ms.length);
+  const flags=[];
+  if(latest.w-earliest.w>=90) flags.push({sev:'warn',tag:'Mornings',text:`${latest.n} is up at ${fmt(latest.w)} but ${earliest.n} at ${fmt(earliest.w)}. Mornings start around ${fmt(dayStartMin)}, so ${earliest.n} loses the early hours.`});
+  if(hi.budget_per_day/lo.budget_per_day>=1.4) flags.push({sev:'warn',tag:'Budget',text:`Budgets run from $${lo.budget_per_day} (${lo.name}) to $${hi.budget_per_day} (${hi.name}) a day. Everything is capped at $${cap} so nobody overspends.`});
+  const rel=ms.filter(m=>m.pace==='relaxed').map(m=>m.name), pk=ms.filter(m=>m.pace==='packed').map(m=>m.name);
+  if(rel.length&&pk.length) flags.push({sev:'warn',tag:'Pace',text:`${names(rel)} want it relaxed while ${names(pk)} want it packed. Planning ${maxAct} activities a day.`});
+  [['hiking','long walks'],['nightlife','late nights']].forEach(([i,db])=>{
+    ms.forEach(a=>{ if(!a.interests.includes(i)) return;
+      ms.forEach(b=>{ if(!b.dealbreakers.includes(db)) return;
+        flags.push({sev:'warn',tag:'Clash',text:a===b?`${a.name} likes ${i} but wants to avoid ${db}. We'll keep it light.`:`${a.name} wants ${i}, but ${b.name} wants to avoid ${db}.`});});});});
+  const vegs=ms.filter(m=>m.diet.some(d=>/veg/.test(d))).map(m=>m.name);
+  if(vegs.length) flags.push({sev:'info',tag:'Diet',text:`Every meal will be vegetarian-friendly (${names(vegs)}).`});
+  return {dayStartMin,cap,diets,interests,avoid,rests,maxAct,flags,n:ms.length};
+}
+
+/* =====================================================================
+   ROOM UI
+   ===================================================================== */
+function renderMembers(){
+  $('#count').textContent=members.length?`(${members.length})`:'';
+  $('#members').innerHTML=members.length?members.map((m,i)=>`
+    <div class="member">
+      ${avatar(m.name)}
+      <div class="info">
+        <b>${esc(m.name)}</b>${m.fromMem.length?'<span class="badge">remembered from past trips</span>':''}
+        <div class="line">Up at ${fmt(toMin(m.wake_time))}, $${m.budget_per_day} a day, ${m.pace} pace${m.diet.length?', '+esc(m.diet.join(', ')):''}${m.rest_windows.length?', rests '+esc(m.rest_windows.join(', ')):''}</div>
+        <div class="chips">${m.interests.map(k=>`<span class="chip static">${INTERESTS.find(x=>x[0]===k)?.[1]||k}</span>`).join('')}${m.dealbreakers.map(k=>`<span class="chip static avoidc">no ${esc(k)}</span>`).join('')}</div>
+      </div>
+      <button class="x" data-del="${i}" title="Remove">×</button>
+    </div>`).join(''):'<div class="empty">Nobody yet. Each traveler adds their own preferences.</div>';
+}
+function renderGroup(){
+  const g=groupProfile(members), el=$('#gprofile');
+  if(!g){ el.innerHTML='<div class="hint">Add a traveler and their limits and clashes show up here.</div>'; return; }
+  el.innerHTML=`
+    <div class="gp-row"><span>Day starts</span><span>~${fmt(g.dayStartMin)}</span></div>
+    <div class="gp-row"><span>Daily cap (lowest)</span><span>$${g.cap} pp</span></div>
+    <div class="gp-row"><span>Pace</span><span>${g.maxAct} activities a day</span></div>
+    <div class="gp-row"><span>Diet</span><span>${g.diets.length?esc(g.diets.join(', ')):'none'}</span></div>
+    <div class="gp-row"><span>Rest windows</span><span>${g.rests.length?esc(g.rests.join(', ')):'none'}</span></div>
+    <div class="gp-sub">Interests (green means everyone)</div>
+    <div class="chips">${g.interests.map(([k,c])=>`<span class="chip static ${c===g.n&&g.n>1?'shared':''}">${INTERESTS.find(x=>x[0]===k)?.[1]||k} ${c>1?'×'+c:''}</span>`).join('')||'<span class="hint">none yet</span>'}</div>
+    ${g.avoid.length?`<div class="gp-sub">Avoiding</div><div class="chips">${g.avoid.map(k=>`<span class="chip static avoidc">${esc(k)}</span>`).join('')}</div>`:''}
+    ${g.flags.map(f=>`<div class="flag ${f.sev}"><b>${f.tag}.</b> ${esc(f.text)}</div>`).join('')}`;
+}
+function renderAdd(){
+  const el=$('#addbox');
+  if(addState==='idle'){ el.innerHTML=`<div class="actions" style="margin-bottom:6px"><button class="secondary" data-a="start">+ Add traveler</button><button class="linkbtn" data-a="demo">Load demo room (Priya + Sam)</button></div>`; return; }
+  if(addState==='name'){ el.innerHTML=`<div class="card"><label>Traveler name</label><div class="row" style="flex-wrap:nowrap"><input id="nm" placeholder="e.g. Priya"><button class="primary sm" data-a="lookup">Continue</button><button class="secondary sm" data-a="cancel">Cancel</button></div>
+      <p class="hint">Returning traveler? We fill in what we remember. Try <button class="linkbtn" data-q="Priya">Priya</button> <button class="linkbtn" data-q="Sam">Sam</button> or <button class="linkbtn" data-q="Jordan">Jordan</button> (new).</p></div>`; setTimeout(()=>{const n=$('#nm'); if(n) n.focus();},0); return; }
+  if(addState==='recalling'){ el.innerHTML=`<div class="card"><span class="inline-spin"></span> Checking memory for ${esc(draft.name)}…</div>`; return; }
+  const d=draft, b=k=>d.fromMem.includes(k)?`<span class="badge" data-badge="${k}">remembered</span>`:'';
+  const chips=(key,list,cls)=>list.map(([k,l])=>`<span class="chip ${cls||''} ${d[key].includes(k)?'on':''}" data-v="${k}">${l}</span>`).join('');
+  el.innerHTML=`<div class="card">
+    <div class="tcard-head">${`<div class="avatar" style="background:${COLORS[members.length%5]}">${esc((d.name[0]||'?').toUpperCase())}</div>`}<div><b>${esc(d.name)}</b><div class="hint" style="margin:0">${d.returning?'Welcome back. We filled in what we remember. Edit anything that changed.':'New traveler. Tell us what you need.'}</div></div></div>
+    <div class="row">
+      <div class="field"><label>Wakes up ${b('wake_time')}</label><input type="time" data-k="wake_time" value="${d.wake_time}"></div>
+      <div class="field"><label>Rest window ${b('rest_windows')}</label><input data-k="rest" placeholder="14:00-15:00" value="${esc(d.rest_windows.join(', '))}"></div>
+      <div class="field"><label>Diet ${b('diet')}</label><select data-k="diet">${DIETS.map(o=>`<option ${(d.diet[0]||'none')===o?'selected':''}>${o}</option>`).join('')}</select></div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <div class="field"><label>Budget / day ($) ${b('budget_per_day')}</label><input type="number" min="20" step="10" data-k="budget_per_day" value="${d.budget_per_day}"></div>
+      <div class="field"><label>Pace ${b('pace')}</label><select data-k="pace">${PACES.map(o=>`<option ${d.pace===o?'selected':''}>${o}</option>`).join('')}</select></div>
+    </div>
+    <label style="margin-top:12px">Interests ${b('interests')}</label><div class="chips" data-chips="interests">${chips('interests',INTERESTS)}</div>
+    <label style="margin-top:12px">Dealbreakers ${b('dealbreakers')}</label><div class="chips" data-chips="dealbreakers">${chips('dealbreakers',DEALBREAKERS,'avoid')}</div>
+  </div>
+  <div class="navrow"><button class="secondary" data-a="cancel">Cancel</button><div>${!d.returning?'<button class="linkbtn" data-a="autofill">Autofill demo details</button> ':''}<button class="primary" data-a="save">Add to trip</button></div></div>`;
+}
+function renderAll(){
+  renderMembers(); renderGroup(); renderAdd();
+  $('#plan').disabled=!members.length;
+  $('#planhint').textContent=!members.length?'Add at least one traveler':(members.length===1?'Tip: a group plan needs 2+ people to show tradeoffs':'');
+}
+function dropBadge(k){ document.querySelectorAll(`[data-badge="${k}"]`).forEach(x=>x.remove()); if(draft) draft.fromMem=draft.fromMem.filter(x=>x!==k); }
+
+$('#addbox').addEventListener('input',e=>{
+  const k=e.target.dataset.k; if(!k||!draft) return;
+  if(k==='rest'){ draft.rest_windows=parseRest(e.target.value); dropBadge('rest_windows'); return; }
+  if(k==='diet') draft.diet=e.target.value==='none'?[]:[e.target.value];
+  else if(k==='budget_per_day') draft.budget_per_day=+e.target.value||0;
+  else draft[k]=e.target.value;
+  dropBadge(k);
+});
+$('#addbox').addEventListener('keydown',e=>{ if(e.key==='Enter'&&e.target.id==='nm') lookup(); });
+$('#addbox').addEventListener('click',e=>{
+  const q=e.target.closest('[data-q]'); if(q){ $('#nm').value=q.dataset.q; return; }
+  const chip=e.target.closest('.chip[data-v]');
+  if(chip&&draft){ const key=chip.closest('[data-chips]').dataset.chips, v=chip.dataset.v, arr=draft[key], i=arr.indexOf(v); i>=0?arr.splice(i,1):arr.push(v); chip.classList.toggle('on'); dropBadge(key); return; }
+  const a=e.target.closest('[data-a]'); if(!a) return;
+  const act=a.dataset.a;
+  if(act==='start'){ addState='name'; renderAdd(); }
+  else if(act==='cancel'){ addState='idle'; draft=null; renderAdd(); }
+  else if(act==='demo') loadDemo();
+  else if(act==='lookup') lookup();
+  else if(act==='autofill'){ Object.assign(draft,{wake_time:'10:00',rest_windows:[],diet:[],budget_per_day:90,pace:'balanced',interests:['coffee','shopping','relax'],dealbreakers:['early mornings']}); renderAdd(); }
+  else if(act==='save') saveDraft();
+});
+async function lookup(){
+  const name=($('#nm').value||'').trim(); if(!name) return;
+  if(members.some(m=>m.name.toLowerCase()===name.toLowerCase())){ toast(`${name} is already on the trip`); return; }
+  draft=blankDraft(name); addState='recalling'; renderAdd();
+  const rec=await mem0Recall(name);
+  if(rec&&rec.fields) draft={...blankDraft(rec.name),...clone(rec.fields),returning:true,fromMem:Object.keys(rec.fields)};
+  addState='form'; renderAdd();
+}
+async function saveDraft(){
+  if(!draft.budget_per_day||draft.budget_per_day<20){ toast('Add a daily budget'); return; }
+  const m=clone(draft); members.push(m); mem0SaveProfile(m);
+  addState='idle'; draft=null; renderAll();
+}
+async function loadDemo(){
+  for(const n of ['Priya','Sam']){
+    if(members.some(m=>m.name===n)) continue;
+    const rec=await mem0Recall(n); if(!rec||!rec.fields) continue;
+    members.push({...blankDraft(rec.name),...clone(rec.fields),returning:true,fromMem:Object.keys(rec.fields)});
+  }
+  renderAll(); toast('Loaded Priya and Sam from memory. Add someone new next.');
+}
+$('#members').addEventListener('click',e=>{ const d=e.target.closest('[data-del]'); if(d){ members.splice(+d.dataset.del,1); renderAll(); } });
+$('#copy').onclick=async()=>{ const url=`https://grouptrip.demo/r/${room.code}`; try{await navigator.clipboard.writeText(url);}catch(e){} toast('Invite link copied (demo link, not live yet)'); };
+
+/* =====================================================================
+   PLANNER SEAM. Swap planTrip() for the real backend call.
+   Request  : {room:{code,destination,days,start_date,lodging}, members:[{name,wake_time,rest_windows,diet,budget_per_day,pace,interests,dealbreakers}]}
+   Response : {priority:string|null, plans:[{key:'fastest'|'max'|'cheapest', label, note,
+                days:[{label, stops:[{name,area,kind:'meal'|'activity',start,end,cost,travel_min,travel_how,matches:[name],why,tag}]}],
+                sc:{travel,dwell,cost,sat:{[name]:pct},minSat,meanSat}}]}
+   start/end are minutes since midnight.
+   ===================================================================== */
+async function planTrip(payload){
+  // const r=await fetch('/api/plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  // if(!r.ok) throw new Error('Planner error '+r.status); return r.json();
+  return mockPlan(payload);
+}
+function buildPayload(){
+  return {room:{code:room.code,destination:'San Francisco',days:+$('#days').value,start_date:$('#start').value||null,lodging:$('#lodging').value},
+          members:members.map(({name,wake_time,rest_windows,diet,budget_per_day,pace,interests,dealbreakers})=>clone({name,wake_time,rest_windows,diet,budget_per_day,pace,interests,dealbreakers}))};
+}
+
+/* ---------- MOCK OPTIMIZER (greedy insertion, 3 weight vectors) ---------- */
+function hav(a,b){const R=6371,r=x=>x*Math.PI/180,dl=r(b.lat-a.lat),dg=r(b.lng-a.lng);const h=Math.sin(dl/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
+function travel(a,b){const km=hav(a,b)*1.3; return km<1?{min:Math.max(2,Math.round(km/4.8*60)),how:'walk'}:{min:Math.round(10+km/18*60),how:'transit'};}
+const WEIGHTS={fastest:{fit:1,dwell:.3,travel:5,cost:.3},max:{fit:1.2,dwell:2.5,travel:.4,cost:.1},cheapest:{fit:.8,dwell:.5,travel:1,cost:6}};
+const LABELS={fastest:'Fastest',max:'Max Experience',cheapest:'Cheapest'};
+
+function mockPlan({room:R,members:M}){
+  const g=groupProfile(M), lodge=LODGING[R.lodging]||LODGING['Mission District'], nm=M.length;
+  const has=(db)=>M.some(m=>m.dealbreakers.includes(db));
+  const mealVeg=M.some(m=>m.diet.some(d=>/veg/.test(d)));
+  const dayEnd=has('late nights')?1260:(M.some(m=>m.interests.includes('nightlife'))?1440:1320);
+  const rests=g.rests.map(w=>w.split('-').map(toMin));
+  // fairness: someone who compromised on a PAST trip gets the dinner pick
+  const priority=M.find(m=>memFacts(m.name).some(f=>/gave up|compromis/i.test(f)&&!f.includes(R.code)));
+  const ok=p=>{
+    if(mealVeg&&p.meal&&!p.veg) return false;
+    if(has('long walks')&&p.walk) return false;
+    if(has('expensive meals')&&p.meal&&p.cost>35) return false;
+    if(has('late nights')&&p.open>=1080&&!p.meal) return false;
+    return true;
+  };
+  const walkN=M.reduce((n,m)=>n+memFacts(m.name).filter(f=>/walk/i.test(f)).length,0), tMult=1+0.5*Math.min(walkN,4);
+  function build(key){
+    const W=WEIGHTS[key], used=new Set(), cnt={}; M.forEach(m=>cnt[m.name]=0);
+    const days=[]; let trT=0,dwT=0,costT=0,total=0;
+    for(let d=0;d<R.days;d++){
+      const stops=[]; let t=g.dayStartMin,loc=lodge,spent=0,nAct=0,hasL=false,hasD=false;
+      for(let guard=0;guard<14;guard++){
+        const capped=nAct>=g.maxAct+(key==='max'?1:0);
+        if(capped&&hasL&&hasD) break;
+        let need=null;
+        if(!hasL&&(t>=720||capped)) need='lunch';
+        else if(!hasD&&(t>=1110||(capped&&hasL))) need='dinner';
+        let best=null;
+        const minCnt=Math.min(...M.map(m=>cnt[m.name]));
+        for(const p of PLACES){
+          if(used.has(p.id)||!ok(p)) continue;
+          if(need?p.meal!==need:(p.meal||capped)) continue;
+          const leg=travel(loc,p), arrive=t+leg.min;
+          let start=Math.max(arrive,p.open,need==='lunch'?690:need==='dinner'?1080:0);
+          if(start-arrive>(need?210:45)) continue;
+          for(const [rs,re] of rests) if(start<re&&start+p.dur>rs) start=Math.max(start,re); // rest window = a break, not "waiting"
+          const end=start+p.dur;
+          if(end>Math.min(p.close,dayEnd+(need==='dinner'?60:0))) continue;
+          if(spent+p.cost>g.cap) continue;
+          let num=0,den=0; const match=[];
+          for(const m of M){
+            const hit=m.interests.some(i=>p.tags.includes(i));
+            let w=1+(cnt[m.name]===minCnt?.8:0);            // least-misery boost
+            if(need==='dinner'&&priority&&m===priority) w+=2; // fairness boost
+            den+=w; if(hit){num+=w;match.push(m.name);}
+          }
+          if(!need&&!match.length) continue;
+          const score=W.fit*(num/den)*40+W.dwell*p.dur/10-W.travel*tMult*leg.min/5-W.cost*p.cost/5;
+          if(!best||score>best.score) best={p,leg,start,end,score,match,need};
+        }
+        if(!best){ if(need==='lunch'){hasL=true;continue;} if(need==='dinner'){hasD=true;continue;} break; }
+        const {p,leg,start,end,match}=best;
+        used.add(p.id); spent+=p.cost; t=end; loc=p;
+        if(p.meal==='lunch') hasL=true; else if(p.meal==='dinner') hasD=true; else nAct++;
+        match.forEach(n=>cnt[n]++);
+        let why,tag=null;
+        if(p.meal){
+          why=(best.need==='dinner'&&priority?`${priority.name} gets the dinner pick (compromised on the last trip). `:'')+(mealVeg?'Vegetarian-friendly for the group.':'Fuel stop.');
+        } else {
+          why=`Picked for ${names(match)}.`+(stops.length===0?` Starts after ${fmt(g.dayStartMin)} so everyone is up.`:'');
+          if(nm>=3&&match.length<Math.ceil(nm/2)){ tag='Compromise'; why+=` Lighter fit for ${names(M.filter(m=>!match.includes(m.name)).map(m=>m.name))}.`; }
+        }
+        stops.push({lat:p.lat,lng:p.lng,name:p.name,area:p.area,kind:p.meal?'meal':'activity',start,end,cost:p.cost,travel_min:leg.min,travel_how:leg.how,matches:match,why,tag});
+        trT+=leg.min; dwT+=p.dur; total++;
+      }
+      costT+=spent; days.push({stops});
+    }
+    const sat={}; M.forEach(m=>sat[m.name]=Math.round(35+65*(cnt[m.name]/Math.max(1,total))));
+    const vals=Object.values(sat);
+    return {key,label:LABELS[key],days,sc:{travel:trT,dwell:dwT,cost:costT,sat,minSat:Math.min(...vals),meanSat:Math.round(vals.reduce((a,b)=>a+b,0)/vals.length)}};
+  }
+  const plans=['fastest','max','cheapest'].map(build);
+  const [f,m,c]=plans.map(p=>p.sc);
+  const lowest=sc=>{const e=Object.entries(sc.sat).sort((a,b)=>a[1]-b[1])[0];return ` Lowest fit: ${e[0]} (${e[1]}%).`;};
+  const dd=(a,b)=>Math.abs(a-b);
+  plans[0].note=`Least time on the road at ${f.travel} min, ${dd(c.travel,f.travel)} min ${c.travel>=f.travel?'less':'more'} than Cheapest, but costs $${dd(f.cost,c.cost)} ${f.cost>=c.cost?'more':'less'} per person.`+lowest(f);
+  plans[1].note=`Most time at the spots: ${m.dwell} min, ${dd(m.dwell,f.dwell)} min ${m.dwell>=f.dwell?'more':'less'} than Fastest, with ${m.travel} min of transit.`+lowest(m);
+  plans[2].note=`Lowest spend at $${c.cost} per person, $${dd(c.cost,m.cost)} ${c.cost<=m.cost?'under':'over'} Max Experience, but ${dd(c.travel,f.travel)} min ${c.travel>=f.travel?'more':'less'} transit than Fastest.`+lowest(c);
+  return {priority:priority?priority.name:null,plans};
+}
+
+/* =====================================================================
+   RESULTS UI
+   ===================================================================== */
+const METRICS=[['Transit',p=>p.sc.travel,v=>v+' min',false],['Time at spots',p=>p.sc.dwell,v=>v+' min',true],['Lowest fit',p=>p.sc.minSat,v=>v+'%',true],['Average fit',p=>p.sc.meanSat,v=>v+'%',true]];
+function routeSVG(p){
+  const all=p.days.flatMap(d=>d.stops).filter(x=>x.lat!=null);
+  if(!all.length) return '';
+  const la=all.map(x=>x.lat), ln=all.map(x=>x.lng), k=Math.cos(37.77*Math.PI/180);
+  const minLa=Math.min(...la), maxLa=Math.max(...la), minLn=Math.min(...ln), maxLn=Math.max(...ln);
+  const W=300,H=150,pad=22, dx=Math.max(.002,(maxLn-minLn)*k), dy=Math.max(.002,maxLa-minLa), sc=Math.min((W-2*pad)/dx,(H-2*pad)/dy);
+  const ox=(W-dx*sc)/2, oy=(H-dy*sc)/2;
+  const X=l=>ox+(l-minLn)*k*sc, Y=l=>H-oy-(l-minLa)*sc;
+  const grid=[50,100,150,200,250].map(x=>`<path d="M${x} 0V${H}" stroke="#d3dcdb" stroke-width=".6"/>`).join('')+[50,100].map(y=>`<path d="M0 ${y}H${W}" stroke="#d3dcdb" stroke-width=".6"/>`).join('');
+  const lines=p.days.map((d,i)=>{ const pts=d.stops.filter(x=>x.lat!=null).map(x=>`${X(x.lng).toFixed(1)},${Y(x.lat).toFixed(1)}`).join(' ');
+    return `<polyline points="${pts}" fill="none" stroke="${i===0?'#d2411e':'#12303b'}" stroke-width="2" ${i?'stroke-dasharray="5 4"':''} stroke-linejoin="round" stroke-linecap="round"/>`; }).join('');
+  const dots=p.days.map((d,i)=>d.stops.filter(x=>x.lat!=null).map(x=>`<circle cx="${X(x.lng).toFixed(1)}" cy="${Y(x.lat).toFixed(1)}" r="${x.kind==='meal'?2.6:4}" fill="${x.kind==='meal'?'#fbfbf9':(i===0?'#d2411e':'#12303b')}" stroke="${i===0?'#d2411e':'#12303b'}" stroke-width="1.6"/>`).join('')).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Sketch of the route">${grid}${lines}${dots}</svg>`;
+}
+const colorOf=n=>COLORS[avIdx(n)%5];
+function renderPlans(){
+  const P=result.plans;
+  $('#ptitle').textContent=`Three ways to do San Francisco`;
+  $('#psub').textContent=`${P[0].days.length} day${P[0].days.length>1?'s':''} for ${names(members.map(m=>m.name))}. Select a plan to read its day-by-day.`;
+  $('#agentnotes').innerHTML=agentNotes.length?`<div class="card agent"><b>What the agent changed</b><ul>${agentNotes.map(n=>`<li>${esc(n)}</li>`).join('')}</ul></div>`:'';
+  const best=METRICS.map(([,fn,,hi])=>{const v=P.map(fn);return hi?Math.max(...v):Math.min(...v);});
+  const bestCost=Math.min(...P.map(p=>p.sc.cost));
+  $('#plans').innerHTML=P.map(p=>`
+    <div class="plan ${p.key===selPlan?'sel':''}" data-plan="${p.key}">
+      <div class="route">${routeSVG(p)}</div>
+      <div class="pbody">
+        <div class="ptop"><h3>${esc(p.label)}</h3>${p.key===chosenPlan?'<span class="picktag">Group pick</span>':''}</div>
+        <div class="big ${p.sc.cost===bestCost?'best':''}">$${p.sc.cost}<small>per person</small></div>
+        <div class="pnote">${esc(p.note)}</div>
+        ${METRICS.map(([lab,fn,f],i)=>`<div class="metric ${fn(p)===best[i]?'best':''}"><span>${lab}</span><span>${f(fn(p))}</span></div>`).join('')}
+        <div class="sats">${Object.entries(p.sc.sat).map(([n,v])=>`<div class="sat">${avatar(n)}<div class="satbar"><i style="width:${v}%;background:${colorOf(n)}"></i></div><b class="${v<=p.sc.minSat?'low':''}">${v}%</b></div>`).join('')}</div>
+        <button class="${p.key===chosenPlan?'primary on':'secondary'} pickbtn" data-choose="${p.key}">${p.key===chosenPlan?'Group pick':'Pick this plan'}</button>
+      </div>
+    </div>`).join('');
+  renderTimeline(); renderFeedback();
+}
+function renderTimeline(){
+  const p=result.plans.find(x=>x.key===selPlan);
+  $('#tltitle').textContent=`${p.label}, day by day`;
+  const start=$('#start').value;
+  const dayLabel=i=>{ if(!start) return 'Day '+(i+1); const d=new Date(start+'T12:00:00'); d.setDate(d.getDate()+i); return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); };
+  if(activeDay>=p.days.length) activeDay=0;
+  $('#tabs').innerHTML=p.days.map((d,i)=>`<div class="tab ${i===activeDay?'on':''}" data-day="${i}">${dayLabel(i)}</div>`).join('');
+  $('#timeline').innerHTML=p.days[activeDay].stops.map(s=>{
+    const [clock,ap]=fmt(s.start).split(' ');
+    const bar=s.matches.length?s.matches.map(n=>`<i style="background:${colorOf(n)}" title="${esc(n)}"></i>`).join(''):'<i style="background:#c3cdcc"></i>';
+    return `<div class="stop ${s.kind==='meal'?'meal':''}">
+      <div class="st">${clock}<span>${ap}</span></div>
+      <div class="bar">${bar}</div>
+      <div class="sb">
+        <h3>${esc(s.name)}${s.tag?'<span class="tag">Compromise</span>':''}</h3>
+        <div class="sm">${esc(s.area)}, $${s.cost} per person, until ${fmt(s.end)}, ${s.travel_min} min ${s.travel_how==='walk'?'on foot':'by transit'} to get here</div>
+        <div class="sw">${esc(s.why)}</div>
+      </div>
+    </div>`;}).join('')||'<div class="empty">Nothing fit this day under the group constraints. Loosen a dealbreaker or the budget cap.</div>';
+}
+function renderFeedback(){
+  const cur=$('#fbwho').value;
+  $('#fbwho').innerHTML=members.map(m=>`<option ${m.name===cur?'selected':''}>${esc(m.name)}</option>`).join('');
+  const g=memLoad().groups[room.code]||[];
+  $('#memlist').innerHTML=members.map(m=>`<div class="mem"><b>${esc(m.name)}</b>: ${memFacts(m.name).length?memFacts(m.name).map(esc).join(' · '):'nothing yet'}</div>`).join('')+
+    `<div class="mem"><b>Group ${room.code}</b>: ${g.length?g.map(esc).join(' · '):'nothing yet'}</div>`;
+}
+$('#plans').addEventListener('click',async e=>{
+  const ch=e.target.closest('[data-choose]');
+  if(ch){ chosenPlan=ch.dataset.choose; selPlan=chosenPlan; const lab=result.plans.find(p=>p.key===chosenPlan).label;
+    await mem0AddGroup(room.code,`Picked ${lab}`); toast(`Group memory updated: picked ${lab}`); renderPlans(); return; }
+  const c=e.target.closest('[data-plan]'); if(c){ selPlan=c.dataset.plan; renderPlans(); }
+});
+$('#tabs').addEventListener('click',e=>{ const t=e.target.closest('[data-day]'); if(t){ activeDay=+t.dataset.day; renderTimeline(); $('#tabs').querySelectorAll('.tab').forEach((x,i)=>x.classList.toggle('on',i===activeDay)); } });
+document.querySelectorAll('[data-fb]').forEach(c=>c.onclick=()=>{ $('#fbtext').value=c.dataset.fb; });
+
+/* ---------- FEEDBACK -> MEMORY -> RE-PLAN (mock LLM extraction) ---------- */
+$('#replan').onclick=async()=>{
+  const text=($('#fbtext').value||'').trim(); if(!text){ toast('Type some feedback first'); return; }
+  const who=members.find(m=>m.name===$('#fbwho').value)||members[0];
+  const t=text.toLowerCase(), notes=[]; const add=(arr,v)=>{ if(!arr.includes(v)) arr.push(v); };
+  const isWalk=/walk|hike|steep|hill/.test(t);
+  if(isWalk){ add(who.dealbreakers,'long walks'); notes.push(`Weighted travel time and walking more heavily because ${who.name} flagged it.`); }
+  if(/early|morning/.test(t)){ if(toMin(who.wake_time)<600) who.wake_time='10:00'; add(who.dealbreakers,'early mornings'); notes.push(`Pushed the day start later for ${who.name}.`); }
+  if(/expens|pricey|cost|cheaper|budget/.test(t)){ who.budget_per_day=Math.max(40,Math.round(who.budget_per_day*0.8/10)*10); notes.push(`Lowered ${who.name}'s daily cap to $${who.budget_per_day}.`); }
+  if(/late|night/.test(t)){ add(who.dealbreakers,'late nights'); notes.push(`Ended the days earlier for ${who.name}.`); }
+  if(!isWalk&&/packed|tired|rushed|too much|exhaust/.test(t)){ who.pace='relaxed'; notes.push(`Moved ${who.name} to a relaxed pace.`); }
+  if(!notes.length) notes.push(`Noted "${text}" for ${who.name}. No hard constraint changed, so the plans stay similar.`);
+  $('#replan').disabled=true; $('#replan').textContent='Re-planning…';
+  try{
+    const prev=result.plans.find(p=>p.key===selPlan);
+    const low=Object.entries(prev.sc.sat).sort((a,b)=>a[1]-b[1])[0][0];
+    await mem0Add(who.name,`Feedback on ${room.code}: ${text}`,{trip:room.code,type:'feedback'});
+    await mem0SaveProfile(who);
+    if(!memFacts(low).some(f=>f.includes(room.code)&&/compromis/i.test(f))) await mem0Add(low,`Took the lowest-fit plan on ${room.code} (compromised)`,{trip:room.code,type:'fairness'});
+    await sleep(900);
+    result=await planTrip(buildPayload());
+    if(result.priority) notes.push(`${result.priority} gets the dinner pick because they compromised last trip.`);
+    notes.push('Saved the feedback to memory so future plans start from it.');
+    agentNotes=notes; $('#fbtext').value='';
+    renderPlans(); renderGroup(); renderMembers(); toast('Memory updated and plans re-run');
+  }catch(err){ toast('Re-plan failed: '+err.message); }
+  finally{ $('#replan').disabled=false; $('#replan').textContent='Re-plan'; }
+};
+
+/* =====================================================================
+   FLOW
+   ===================================================================== */
+const MSGS=['Merging everyone\'s constraints…','Scoring candidate itineraries…','Optimizing routes between stops…','Explaining the tradeoffs…'];
+$('#plan').onclick=async()=>{
+  show('loading'); let i=0; $('#loadmsg').textContent=MSGS[0];
+  const tick=setInterval(()=>{ i=(i+1)%MSGS.length; $('#loadmsg').textContent=MSGS[i]; },1000);
+  try{
+    const [res]=await Promise.all([planTrip(buildPayload()),sleep(3500)]);
+    result=res; selPlan='fastest'; chosenPlan=null; activeDay=0; agentNotes=[];
+    renderPlans(); show('plans');
+  }catch(err){ show('room'); toast('Planning failed: '+err.message); }
+  finally{ clearInterval(tick); }
+};
+$('#back').onclick=()=>{ show('room'); renderAll(); };
+$('#heroGo').onclick=()=>{ $('#members').scrollIntoView({behavior:'smooth',block:'start'}); setTimeout(()=>{ if(addState==='idle'){ addState='name'; renderAdd(); } },250); };
+document.querySelectorAll('.bnav button').forEach(b=>b.onclick=()=>{
+  const n=b.dataset.nav;
+  if(n==='room'){ show('room'); renderAll(); }
+  else if(!result){ toast('Plan the trip first'); }
+  else if(n==='plans'){ show('plans'); }
+  else { show('plans'); setTimeout(()=>$('#fbcard').scrollIntoView({behavior:'smooth'}),50); }
+});
+renderAll();
+</script>
+</body>
+</html>

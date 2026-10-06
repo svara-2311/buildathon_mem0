@@ -1,28 +1,33 @@
-GroupTrip: front end
+# GroupTrip: front end
+
 Shared trip room where each traveler adds preferences, the app merges them into a group
 profile (with conflict flags), and an agent returns three plans (Fastest / Max Experience /
 Cheapest) with scorecards. Feedback is written to memory and the trip is re-planned.
+
 Single static file, no build step.
-python3 -m http.server 8000   # then open <http://localhost:8000>
-​
-Where the backend plugs in
-Everything the UI needs from the backend goes through three functions near the top of the
-<script> in index.html. Each has the real fetch call sketched in a comment right above the mock.
-Function
-Replace with
-Notes
-planTrip(payload)
-POST /api/plan
-Optimizer + LLM explanation. Contract below.
-mem0Recall(name)
-GET /api/memory/recall?user_id=
-Returns remembered profile fields + facts, or null. Drives the "from past trips" badges.
-mem0Add(name, text, meta) / mem0SaveProfile(m) / mem0AddGroup(code, text)
-POST /api/memory/add
-Feedback, fairness ("compromised") and group-pick writes.
-The mock optimizer (mockPlan) and seeded SF places (PLACES) can be deleted once planTrip calls the real API.
-POST /api/plan
+
+```bash
+python3 -m http.server 8000   # then open http://localhost:8000
+```
+
+## Where the backend plugs in
+
+Everything the UI needs from the backend goes through **three functions** near the top of the
+`<script>` in `index.html`. Each has the real `fetch` call sketched in a comment right above the mock.
+
+| Function | Replace with | Notes |
+|---|---|---|
+| `planTrip(payload)` | `POST /api/plan` | Optimizer + LLM explanation. Contract below. |
+| `mem0Recall(name)` | `GET /api/memory/recall?user_id=` | Returns remembered profile fields + facts, or `null`. Drives the "from past trips" badges. |
+| `mem0Add(name, text, meta)` / `mem0SaveProfile(m)` / `mem0AddGroup(code, text)` | `POST /api/memory/add` | Feedback, fairness ("compromised") and group-pick writes. |
+
+The mock optimizer (`mockPlan`) and seeded SF places (`PLACES`) can be deleted once `planTrip` calls the real API.
+
+## `POST /api/plan`
+
 Request:
+
+```json
 {
   "room": { "code": "AB12C", "destination": "San Francisco", "days": 2, "start_date": null, "lodging": "Mission District" },
   "members": [
@@ -38,11 +43,15 @@ Request:
     }
   ]
 }
-​
-Allowed values: pace = relaxed | balanced | packed;
-interests = food, coffee, museums, hiking, nightlife, shopping, views, relax;
-dealbreakers = early mornings, long walks, late nights, expensive meals.
-Response (times are minutes since midnight):
+```
+
+Allowed values: `pace` = `relaxed | balanced | packed`;
+`interests` = `food, coffee, museums, hiking, nightlife, shopping, views, relax`;
+`dealbreakers` = `early mornings, long walks, late nights, expensive meals`.
+
+Response (times are **minutes since midnight**):
+
+```json
 {
   "priority": "Sam",
   "plans": [
@@ -70,16 +79,22 @@ Response (times are minutes since midnight):
     }
   ]
 }
-​
-key is one of fastest | max | cheapest; return all three.
-kind is meal or activity; tag is "Compromise" or null; travel_how is walk | transit.
-priority is the traveler who gets the contested dinner pick (fairness memory), or null.
-sc.sat values are 0-100 per person; the UI highlights the lowest and best-in-row metrics.
-Memory shapes
-mem0Recall → { "name": "Priya", "fields": { ...same keys as a member... }, "facts": ["Hated the 40-minute walk"] }
-Facts matching /gave up|compromis/i from a previous trip are what the mock planner uses for the dinner-pick priority.
-Demo script
-Load demo room → Priya and Sam appear pre-filled with "from past trips" badges.
-Add traveler → type Jordan → Autofill demo details (wakes at 10:00) → conflict flags appear on the group profile.
-Plan our trip → three plans with scorecards. Tap a plan to see its timeline.
-Give feedback ("Too much walking") → Re-plan → agent notes + memory update.
+```
+
+- `key` is one of `fastest | max | cheapest`; return all three.
+- `kind` is `meal` or `activity`; `tag` is `"Compromise"` or `null`; `travel_how` is `walk | transit`.
+- `priority` is the traveler who gets the contested dinner pick (fairness memory), or `null`.
+- `sc.sat` values are 0-100 per person; the UI highlights the lowest and best-in-row metrics.
+
+## Memory shapes
+
+`mem0Recall` → `{ "name": "Priya", "fields": { ...same keys as a member... }, "facts": ["Hated the 40-minute walk"] }`
+
+Facts matching `/gave up|compromis/i` from a *previous* trip are what the mock planner uses for the dinner-pick priority.
+
+## Demo script
+
+1. **Load demo room** → Priya and Sam appear pre-filled with "from past trips" badges.
+2. **Add traveler** → type `Jordan` → **Autofill demo details** (wakes at 10:00) → conflict flags appear on the group profile.
+3. **Plan our trip** → three plans with scorecards. Tap a plan to see its timeline.
+4. Give feedback ("Too much walking") → **Re-plan** → agent notes + memory update.
